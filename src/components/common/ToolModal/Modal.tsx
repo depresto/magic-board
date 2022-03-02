@@ -1,19 +1,15 @@
 import React from "react";
 import styled from "styled-components";
-import Draggable from "react-draggable";
-import Portal from "../Portal";
+import { Rnd } from "react-rnd";
 import ModalHeader from "./Header";
 import { ModalProvider, useModelContext } from "./ModalContext";
-import { useAppSizing } from "../../../context/AppSizingContext";
 
 const StyledModalDiv = styled.div`
-  position: fixed;
-  left: 100;
-  top: 0;
-
   background: #e5e5e5;
   border: 1px solid #e5e5e5;
   border-radius: 5px;
+  width: 100%;
+  height: 100%;
 
   .modal-container {
     position: relative;
@@ -24,49 +20,32 @@ export type ModalProps = {
   title?: string;
 };
 
-const ModalRoot: React.FC<ModalProps> = ({ title }) => {
-  const { modelRef, setModalRef, modalWidth, modalHeight } = useModelContext();
-  const { contentBounding } = useAppSizing();
+const ModalRoot: React.FC<ModalProps> = ({ title, children }) => {
+  const { setModalRef } = useModelContext();
 
   return (
-    <Draggable
-      handle=".draggable-handle"
-      bounds={{
-        left: contentBounding?.left,
-        top: contentBounding?.top,
-        right:
-          contentBounding && modelRef
-            ? contentBounding.right - modelRef.clientWidth
-            : undefined,
-        bottom:
-          contentBounding && modelRef
-            ? contentBounding.bottom - modelRef.clientHeight
-            : undefined,
-      }}
-      defaultPosition={{ x: 120, y: 10 }}
+    <Rnd
+      dragHandleClassName="draggable-handle"
+      bounds=".layout-content"
+      default={{ x: 10, y: 10, width: 500, height: 300 }}
+      minWidth={400}
+      minHeight={250}
     >
-      <StyledModalDiv
-        ref={setModalRef}
-        style={{
-          width: modalWidth,
-          height: modalHeight,
-        }}
-      >
+      <StyledModalDiv ref={setModalRef}>
         <div className="modal-container">
           <ModalHeader>{title}</ModalHeader>
+          <div className="modal-body">{children}</div>
         </div>
       </StyledModalDiv>
-    </Draggable>
+    </Rnd>
   );
 };
 
 const Modal: React.FC<ModalProps> = ({ ...props }) => {
   return (
-    <Portal>
-      <ModalProvider>
-        <ModalRoot {...props} />
-      </ModalProvider>
-    </Portal>
+    <ModalProvider>
+      <ModalRoot {...props} />
+    </ModalProvider>
   );
 };
 

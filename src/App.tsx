@@ -1,6 +1,6 @@
 import React from "react";
 import Layout from "./components/common/Layout";
-import ToolModal from "./components/common/ToolModal";
+import NumberLineToolModal from "./components/widget/NumberLineToolModal";
 import { AppSizingProvider } from "./context/AppSizingContext";
 import { CustomThemeProvider } from "./context/CustomThemeContext";
 
@@ -9,7 +9,7 @@ const App: React.FC = () => {
     <CustomThemeProvider>
       <AppSizingProvider>
         <Layout>
-          <ToolModal title="元件庫"></ToolModal>
+          <NumberLineToolModal />
         </Layout>
       </AppSizingProvider>
     </CustomThemeProvider>
