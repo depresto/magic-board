@@ -6,12 +6,20 @@ const selectOptionValues = Array.from(Array(15).keys()).map((index) => ({
   label: index,
 }));
 
-const NumberSelect: React.FC<{ defaultValue?: number }> = ({
-  defaultValue,
-}) => {
+const NumberSelect: React.FC<{
+  defaultValue?: number;
+  value?: number;
+  onChange?: (value: number) => void;
+}> = ({ defaultValue, value, onChange }) => {
   return (
     <Select
       defaultValue={selectOptionValues[defaultValue ?? 0]}
+      value={value ? selectOptionValues[value] : undefined}
+      onChange={(newValue) => {
+        if (newValue?.value) {
+          onChange?.(newValue.value);
+        }
+      }}
       options={selectOptionValues}
       styles={{
         dropdownIndicator: (provided) => {
