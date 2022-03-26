@@ -1,3 +1,5 @@
+export type WidgetType = "number-line-tool";
 export type WidgetDraggableProps = {
-  widgetType: string;
+  widgetType: WidgetType;
+  widgetProps: { [key: string]: number };
 };

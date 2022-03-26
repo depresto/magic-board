@@ -11,6 +11,8 @@ const StyledPreviewDiv = styled.div`
 type NumberLineToolProps = {
   isPreview?: boolean;
   canvas: fabric.Canvas | null;
+  initialX?: number;
+  initialY?: number;
   intervalStart: number;
   intervalEnd: number;
   baseDominator: number;
@@ -20,6 +22,8 @@ type NumberLineToolProps = {
 const NumberLineTool: React.FC<NumberLineToolProps> = ({
   isPreview,
   canvas,
+  initialX,
+  initialY,
   intervalStart,
   intervalEnd,
   baseDominator,
@@ -31,7 +35,16 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
 
   const [imgCollected, dragImgRef, preview] = useDrag<WidgetDraggableProps>({
     type: "widget",
-    item: { widgetType: "number-line-tool" },
+    item: {
+      widgetType: "number-line-tool",
+      widgetProps: {
+        intervalStart,
+        intervalEnd,
+        baseDominator,
+        numerator,
+        dominator,
+      },
+    },
   });
 
   useEffect(() => {
@@ -127,7 +140,10 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
       counter += 1;
     }
 
-    const lineGroup = new fabric.Group(lineGroupObjects);
+    const lineGroup = new fabric.Group(lineGroupObjects, {
+      left: initialX || 0,
+      top: initialY || 0,
+    });
 
     if (imgRef) {
       const dataUrl = lineGroup.toDataURL({});
@@ -147,7 +163,15 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
         canvas.remove(lineGroup);
       }
     };
-  }, [baseDominator, canvas, imgRef, intervalEnd, intervalStart]);
+  }, [
+    baseDominator,
+    canvas,
+    imgRef,
+    initialX,
+    initialY,
+    intervalEnd,
+    intervalStart,
+  ]);
 
   if (isPreview) {
     return (
