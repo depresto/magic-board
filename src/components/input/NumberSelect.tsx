@@ -1,7 +1,7 @@
 import React from "react";
 import Select from "react-select";
 
-const selectOptionValues = Array.from(Array(15).keys()).map((index) => ({
+const selectOptionValues = Array.from(Array(11).keys()).map((index) => ({
   value: index,
   label: index,
 }));

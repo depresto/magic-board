@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import { fabric } from "fabric";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRotateLeft } from "@fortawesome/free-solid-svg-icons";
 import ToolModal from "../common/ToolModal";
@@ -18,9 +17,17 @@ const StyledDividerLineDiv = styled.div`
   width: 80px;
   margin: 4px 0;
 `;
-const StyledCanvasWrapper = styled.div`
+const StyledImageWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
+  padding: 0 20px;
   flex-grow: 1;
+  img {
+    max-width: 100%;
+    height: auto;
+  }
 `;
 const StyledButton = styled.button`
   font-size: 16px;
@@ -41,41 +48,12 @@ const defaultNumerator = 1;
 const defaultDominator = 2;
 
 const NumberLineToolModal: React.FC = () => {
-  const [canvasWrapperRef, setCanvasWrapperRef] =
-    useState<HTMLDivElement | null>(null);
-  const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
-  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
-  useEffect(() => {
-    let canvas: fabric.Canvas | null = null;
-    if (canvasRef) {
-      canvas = new fabric.Canvas(canvasRef);
-      setCanvas(canvas);
-    }
-    return () => {
-      setCanvas(null);
-      canvas?.dispose();
-    };
-  }, [canvasRef]);
-
   const [intervalStart, setIntervalStart] = useState(defaultIntervalStart);
   const [intervalEnd, setIntervalEnd] = useState(defaultIntervalEnd);
 
   const [baseDominator, setBaseDominator] = useState(defaultBaseDominator);
   const [numerator, setNumerator] = useState(defaultNumerator);
   const [dominator, setDominator] = useState(defaultDominator);
-
-  const onModalResize = () => {
-    if (canvasWrapperRef) {
-      const width = canvasWrapperRef.clientWidth;
-      const height = canvasWrapperRef.clientHeight;
-      const context = canvas?.getContext();
-
-      if (canvas && context) {
-        canvas.setWidth(width);
-        canvas.setHeight(height);
-      }
-    }
-  };
 
   const onReset = () => {
     setIntervalStart(defaultIntervalStart);
@@ -86,7 +64,7 @@ const NumberLineToolModal: React.FC = () => {
   };
 
   return (
-    <ToolModal title="數線工具" onResize={onModalResize}>
+    <ToolModal title="數線工具">
       <StyledNumberLineToolContentDiv>
         <div className="d-flex justify-content-between align-items-center">
           <div>
@@ -150,17 +128,17 @@ const NumberLineToolModal: React.FC = () => {
         </div>
       </StyledNumberLineToolContentDiv>
 
-      <NumberLineTool
-        canvas={canvas}
-        intervalStart={intervalStart}
-        intervalEnd={intervalEnd}
-        baseDominator={baseDominator}
-        numerator={numerator}
-        dominator={dominator}
-      />
-      <StyledCanvasWrapper ref={setCanvasWrapperRef}>
-        <canvas ref={setCanvasRef}></canvas>
-      </StyledCanvasWrapper>
+      <StyledImageWrapper>
+        <NumberLineTool
+          isPreview
+          canvas={null}
+          intervalStart={intervalStart}
+          intervalEnd={intervalEnd}
+          baseDominator={baseDominator}
+          numerator={numerator}
+          dominator={dominator}
+        />
+      </StyledImageWrapper>
     </ToolModal>
   );
 };
