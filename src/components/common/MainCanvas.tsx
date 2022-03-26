@@ -12,6 +12,7 @@ type CanvasWidgetProps = {
   props: { [key: string]: number };
 };
 
+const sidebarOffset = 100;
 const StyledCanvasWrapper = styled.div`
   &,
   .wrapper {
@@ -65,12 +66,12 @@ const MainCanvas: React.FC = () => {
   const [collected, dropRef] = useDrop<WidgetDraggableProps>({
     accept: "widget",
     drop: (item, monitor) => {
-      const clientOffset = monitor.getClientOffset();
+      const clientOffset = monitor.getSourceClientOffset();
 
       if (clientOffset) {
         setCanvasWidgets((canvasWidgets) => {
           const newWidget = {
-            x: clientOffset.x,
+            x: clientOffset.x - sidebarOffset,
             y: clientOffset.y,
             type: item.widgetType,
             props: item.widgetProps,
