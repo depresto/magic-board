@@ -39,9 +39,9 @@ const ModalRoot: React.FC<ModalProps> = ({ title, onResize, children }) => {
     <Rnd
       dragHandleClassName="draggable-handle"
       bounds=".layout-content"
-      default={{ x: 10, y: 10, width: 500, height: 360 }}
+      default={{ x: 10, y: 10, width: 500, height: 380 }}
       minWidth={400}
-      minHeight={250}
+      minHeight={380}
       onResize={onResize}
     >
       <StyledModalDiv ref={setModalRef}>

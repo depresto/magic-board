@@ -27,12 +27,13 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
 
     const startX = 40;
     const startY = 40;
-    const lineWidth = 400;
-    const lineHeight = 30;
+    const numberLineWidth = 400;
+    const numberLineHeight = 36;
+    const numberLineGapHeight = 20;
 
-    const lineGapWidth = lineWidth / baseDominator;
-
-    console.log(baseDominator);
+    const totalGapCount = (intervalEnd - intervalStart) * baseDominator;
+    const lineGapWidth = numberLineWidth / totalGapCount;
+    const numberLineHeightGap = (numberLineHeight - numberLineGapHeight) / 2;
 
     if (canvas) {
       // const circle = new fabric.Circle({
@@ -44,29 +45,59 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
       // circle.cornerSize = 6;
 
       const lineGroupObjects: fabric.Object[] = [];
-      const baseLine = new fabric.Line([0, 0, lineWidth, 0], {
+      const baseLine = new fabric.Line([0, 0, numberLineWidth, 0], {
         stroke: "black",
         fill: "black",
         strokeWidth: 2,
         strokeLineCap: "round",
         left: startX,
-        top: startY + lineHeight / 2,
+        top: startY + numberLineHeight / 2,
       });
       lineGroupObjects.push(baseLine);
+
+      let counter = 0;
       for (
         let currentX = startX;
-        currentX <= startX + lineWidth + lineGapWidth / 2;
+        currentX <= startX + numberLineWidth + lineGapWidth / 2;
         currentX += lineGapWidth
       ) {
-        const line = new fabric.Line([currentX, 0, currentX, lineHeight], {
-          stroke: "black",
-          fill: "black",
-          strokeWidth: 2,
-          strokeLineCap: "round",
-          left: currentX,
-          top: startY,
+        const isCurrentInteger = counter % baseDominator === 0;
+        const line = new fabric.Line(
+          [
+            currentX,
+            isCurrentInteger ? 0 : numberLineHeightGap,
+            currentX,
+            isCurrentInteger
+              ? numberLineHeight
+              : numberLineHeight - numberLineHeightGap,
+          ],
+          {
+            stroke: "black",
+            fill: "black",
+            strokeWidth: 2,
+            strokeLineCap: "round",
+            left: currentX,
+            top: isCurrentInteger ? startY : startY + numberLineHeightGap,
+          }
+        );
+        lineGroupObjects.push(line);
+        counter += 1;
+      }
+
+      counter = 0;
+      for (
+        let IntegerCounter = intervalStart;
+        IntegerCounter <= intervalEnd;
+        IntegerCounter += 1
+      ) {
+        const line = new fabric.Text(counter.toString(), {
+          fontSize: 28,
+          fontFamily: "san-serif",
+          left: startX + counter * lineGapWidth * baseDominator - 8,
+          top: startY + numberLineHeight + 6,
         });
         lineGroupObjects.push(line);
+        counter += 1;
       }
 
       lineGroup = new fabric.Group(lineGroupObjects);
@@ -82,7 +113,8 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
         canvas?.remove(lineGroup);
       }
     };
-  }, [baseDominator, canvas]);
+  }, [baseDominator, canvas, intervalEnd, intervalStart]);
+
   return <StyledNumberLineTool></StyledNumberLineTool>;
 };
 
