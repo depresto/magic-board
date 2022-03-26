@@ -6,7 +6,7 @@ const StyledNumberLineTool = styled.div``;
 
 type NumberLineToolProps = {
   isPreview?: boolean;
-  canvasRef: HTMLCanvasElement | null;
+  canvas: fabric.Canvas | null;
   intervalStart: number;
   intervalEnd: number;
   baseDominator: number;
@@ -15,7 +15,7 @@ type NumberLineToolProps = {
 };
 const NumberLineTool: React.FC<NumberLineToolProps> = ({
   isPreview,
-  canvasRef,
+  canvas,
   intervalStart,
   intervalEnd,
   baseDominator,
@@ -23,8 +23,18 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
   dominator,
 }) => {
   useEffect(() => {
-    if (canvasRef) {
-      const canvas = new fabric.Canvas(canvasRef);
+    let lineGroup: fabric.Group;
+
+    const startX = 40;
+    const startY = 40;
+    const lineWidth = 400;
+    const lineHeight = 30;
+
+    const lineGapWidth = lineWidth / baseDominator;
+
+    console.log(baseDominator);
+
+    if (canvas) {
       // const circle = new fabric.Circle({
       //   radius: 20,
       //   fill: "green",
@@ -34,35 +44,45 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
       // circle.cornerSize = 6;
 
       const lineGroupObjects: fabric.Object[] = [];
-      const baseLine = new fabric.Line([0, 0, 500, 0], {
+      const baseLine = new fabric.Line([0, 0, lineWidth, 0], {
         stroke: "black",
         fill: "black",
         strokeWidth: 2,
         strokeLineCap: "round",
-        left: 0,
-        top: 20,
+        left: startX,
+        top: startY + lineHeight / 2,
       });
       lineGroupObjects.push(baseLine);
-      for (let currentX = 0; currentX < 200; currentX += 20) {
-        const line = new fabric.Line([currentX, 0, currentX, 40], {
+      for (
+        let currentX = startX;
+        currentX <= startX + lineWidth + lineGapWidth / 2;
+        currentX += lineGapWidth
+      ) {
+        const line = new fabric.Line([currentX, 0, currentX, lineHeight], {
           stroke: "black",
           fill: "black",
           strokeWidth: 2,
           strokeLineCap: "round",
           left: currentX,
-          top: 0,
+          top: startY,
         });
         lineGroupObjects.push(line);
       }
 
-      const lineGroup = new fabric.Group(lineGroupObjects);
+      lineGroup = new fabric.Group(lineGroupObjects);
       // canvas.add(circle);
       canvas.add(lineGroup);
       canvas.selection = true;
       canvas.targetFindTolerance = 4;
       canvas.perPixelTargetFind = true;
     }
-  }, [canvasRef]);
+
+    return () => {
+      if (lineGroup) {
+        canvas?.remove(lineGroup);
+      }
+    };
+  }, [baseDominator, canvas]);
   return <StyledNumberLineTool></StyledNumberLineTool>;
 };
 

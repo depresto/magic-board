@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { Rnd } from "react-rnd";
 import ModalHeader from "./Header";
@@ -13,23 +13,36 @@ const StyledModalDiv = styled.div`
 
   .modal-container {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
   }
 `;
 
 export type ModalProps = {
   title?: string;
+  onResize?: () => void;
 };
 
-const ModalRoot: React.FC<ModalProps> = ({ title, children }) => {
+const ModalRoot: React.FC<ModalProps> = ({ title, onResize, children }) => {
   const { setModalRef } = useModelContext();
+  useEffect(() => {
+    onResize?.();
+  }, [onResize]);
 
   return (
     <Rnd
       dragHandleClassName="draggable-handle"
       bounds=".layout-content"
-      default={{ x: 10, y: 10, width: 500, height: 300 }}
+      default={{ x: 10, y: 10, width: 500, height: 360 }}
       minWidth={400}
       minHeight={250}
+      onResize={onResize}
     >
       <StyledModalDiv ref={setModalRef}>
         <div className="modal-container">

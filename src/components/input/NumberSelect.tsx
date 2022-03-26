@@ -8,19 +8,35 @@ const selectOptionValues = Array.from(Array(15).keys()).map((index) => ({
 
 const NumberSelect: React.FC<{
   defaultValue?: number;
+  startIndex?: number;
   value?: number;
   onChange?: (value: number) => void;
-}> = ({ defaultValue, value, onChange }) => {
+}> = ({ defaultValue, startIndex, value, onChange }) => {
+  const optionsValues = selectOptionValues.filter((optionValue) => {
+    if (startIndex) {
+      return optionValue.label >= startIndex;
+    } else {
+      return true;
+    }
+  });
+
+  const defaultOptionValue = optionsValues.find(
+    (option) => option.value === defaultValue ?? 0
+  );
+  const optionValue = value
+    ? optionsValues.find((option) => option.value === value)
+    : undefined;
+
   return (
     <Select
-      defaultValue={selectOptionValues[defaultValue ?? 0]}
-      value={value ? selectOptionValues[value] : undefined}
+      defaultValue={defaultOptionValue}
+      value={optionValue}
       onChange={(newValue) => {
-        if (newValue?.value) {
+        if (typeof newValue?.value !== "undefined") {
           onChange?.(newValue.value);
         }
       }}
-      options={selectOptionValues}
+      options={optionsValues}
       styles={{
         dropdownIndicator: (provided) => {
           return {
