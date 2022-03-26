@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { fabric } from "fabric";
+import { useDrag, DragPreviewImage } from "react-dnd";
+import styled from "styled-components";
+import { WidgetDraggableProps } from "../../types/widget";
+
+const StyledPreviewDiv = styled.div`
+  cursor: pointer;
+`;
 
 type NumberLineToolProps = {
   isPreview?: boolean;
@@ -20,6 +27,12 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
   dominator,
 }) => {
   const [imgRef, setImgRef] = useState<HTMLImageElement | null>(null);
+  const [imgSrc, setImgSrc] = useState("");
+
+  const [imgCollected, dragImgRef, preview] = useDrag<WidgetDraggableProps>({
+    type: "widget",
+    item: { widgetType: "number-line-tool" },
+  });
 
   useEffect(() => {
     const lineStrokeColor = "black";
@@ -118,11 +131,11 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
 
     if (imgRef) {
       const dataUrl = lineGroup.toDataURL({});
+      setImgSrc(dataUrl);
       imgRef.src = dataUrl;
     }
 
     if (canvas) {
-      // canvas.add(circle);
       canvas.add(lineGroup);
       canvas.selection = true;
       canvas.targetFindTolerance = 4;
@@ -137,7 +150,12 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
   }, [baseDominator, canvas, imgRef, intervalEnd, intervalStart]);
 
   if (isPreview) {
-    return <img ref={setImgRef} alt="" />;
+    return (
+      <StyledPreviewDiv ref={dragImgRef} {...imgCollected}>
+        <DragPreviewImage connect={preview} src={imgSrc} />
+        <img ref={setImgRef} alt="" />
+      </StyledPreviewDiv>
+    );
   }
 
   return <div></div>;

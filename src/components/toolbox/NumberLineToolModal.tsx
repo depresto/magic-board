@@ -22,7 +22,7 @@ const StyledImageWrapper = styled.div`
   justify-content: center;
   align-items: center;
   width: 100%;
-  padding: 0 20px;
+  padding: 0 24px;
   flex-grow: 1;
   img {
     max-width: 100%;

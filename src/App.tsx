@@ -1,23 +1,22 @@
 import React from "react";
-import styled from "styled-components";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import Layout from "./components/common/Layout";
+import MainCanvas from "./components/common/MainCanvas";
 import NumberLineToolModal from "./components/toolbox/NumberLineToolModal";
 import { AppSizingProvider } from "./context/AppSizingContext";
 import { CustomThemeProvider } from "./context/CustomThemeContext";
-
-const StyledMainCanvas = styled.canvas`
-  width: 100%;
-  height: 100%;
-`;
 
 const App: React.FC = () => {
   return (
     <CustomThemeProvider>
       <AppSizingProvider>
-        <Layout>
-          <StyledMainCanvas id="canvas" />
-          <NumberLineToolModal />
-        </Layout>
+        <DndProvider backend={HTML5Backend}>
+          <Layout>
+            <MainCanvas />
+            <NumberLineToolModal />
+          </Layout>
+        </DndProvider>
       </AppSizingProvider>
     </CustomThemeProvider>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import styled from "styled-components";
 import { Rnd } from "react-rnd";
 import ModalHeader from "./Header";
@@ -26,14 +26,9 @@ const StyledModalDiv = styled.div`
 
 export type ModalProps = {
   title?: string;
-  onResize?: () => void;
 };
-
-const ModalRoot: React.FC<ModalProps> = ({ title, onResize, children }) => {
+const ModalRoot: React.FC<ModalProps> = ({ title, children }) => {
   const { setModalRef } = useModelContext();
-  useEffect(() => {
-    onResize?.();
-  }, [onResize]);
 
   return (
     <Rnd
@@ -42,7 +37,6 @@ const ModalRoot: React.FC<ModalProps> = ({ title, onResize, children }) => {
       default={{ x: 10, y: 10, width: 500, height: 380 }}
       minWidth={400}
       minHeight={380}
-      onResize={onResize}
     >
       <StyledModalDiv ref={setModalRef}>
         <div className="modal-container">
