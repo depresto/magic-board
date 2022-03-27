@@ -32,6 +32,43 @@ const StyledCanvasWrapper = styled.div`
   }
 `;
 const MainCanvas: React.FC = () => {
+  const [canvasWidgets, setCanvasWidgets] = useState<CanvasWidgetProps[]>([]);
+  const [collected, dropRef] = useDrop<WidgetDraggableProps>({
+    accept: "widget",
+    drop: (item, monitor) => {
+      const clientOffset = monitor.getSourceClientOffset();
+
+      if (clientOffset) {
+        setCanvasWidgets((canvasWidgets) => {
+          const newWidget = {
+            x: clientOffset.x - sidebarOffset,
+            y: clientOffset.y,
+            type: item.widgetType,
+            props: item.widgetProps,
+          };
+          return [...canvasWidgets, newWidget];
+        });
+      }
+
+      return undefined;
+    },
+  });
+
+  useEffect(() => {
+    try {
+      const widgetsData = localStorage.getItem("data.widgets");
+      if (widgetsData) {
+        setCanvasWidgets(JSON.parse(widgetsData));
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("data.widgets", JSON.stringify(canvasWidgets));
+    } catch {}
+  }, [canvasWidgets]);
+
   const [canvasWrapperRef, setCanvasWrapperRef] =
     useState<HTMLDivElement | null>(null);
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
@@ -69,28 +106,6 @@ const MainCanvas: React.FC = () => {
     return () => {
       window.removeEventListener("resize", onWindowResize);
     };
-  });
-
-  const [canvasWidgets, setCanvasWidgets] = useState<CanvasWidgetProps[]>([]);
-  const [collected, dropRef] = useDrop<WidgetDraggableProps>({
-    accept: "widget",
-    drop: (item, monitor) => {
-      const clientOffset = monitor.getSourceClientOffset();
-
-      if (clientOffset) {
-        setCanvasWidgets((canvasWidgets) => {
-          const newWidget = {
-            x: clientOffset.x - sidebarOffset,
-            y: clientOffset.y,
-            type: item.widgetType,
-            props: item.widgetProps,
-          };
-          return [...canvasWidgets, newWidget];
-        });
-      }
-
-      return undefined;
-    },
   });
 
   return (

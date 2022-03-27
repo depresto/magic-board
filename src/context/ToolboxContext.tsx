@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 export type ToolboxProps = {
   x?: number;
@@ -28,6 +28,20 @@ export const useToolbox = () => useContext(ToolboxContext);
 
 export const ToolboxProvider: React.FC = ({ children }) => {
   const [toolboxes, setToolboxes] = useState<ToolboxToolboxesProps>({});
+  useEffect(() => {
+    try {
+      const toolboxData = localStorage.getItem("data.toolboxes");
+      if (toolboxData) {
+        setToolboxes(JSON.parse(toolboxData));
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("data.toolboxes", JSON.stringify(toolboxes));
+    } catch {}
+  }, [toolboxes]);
 
   const setToolbox = (toolboxType: string, toolboxProps: ToolboxProps) => {
     setToolboxes((toolboxes) => {
