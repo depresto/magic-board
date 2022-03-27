@@ -58,11 +58,7 @@ const Sidebar: React.FC = () => {
       </div>
 
       <div className="model-container d-flex flex-column justify-content-center">
-        <StyledModalButton
-          className="my-4 py-1"
-          $active={Boolean(toolboxes["number-line-tool"])}
-          onClick={() => onClickToolbox("number-line-tool")}
-        >
+        <StyledModalButton className="my-4 py-1">
           <ComponentCircleSvg />
         </StyledModalButton>
 
@@ -70,7 +66,11 @@ const Sidebar: React.FC = () => {
           <ComponentSquareSvg />
         </StyledModalButton>
 
-        <StyledModalButton className="my-4 py-1">
+        <StyledModalButton
+          className="my-4 py-1"
+          $active={Boolean(toolboxes["number-line-tool"])}
+          onClick={() => onClickToolbox("number-line-tool")}
+        >
           <ComponentLineSvg />
         </StyledModalButton>
       </div>
