@@ -1,3 +1,11 @@
+export type WidgetElementProps = {
+  id?: string;
+  isPreview?: boolean;
+  canvas: fabric.Canvas | null;
+  initialX?: number;
+  initialY?: number;
+  initialAngle?: number;
+};
 export type WidgetType = "number-line-tool";
 export type WidgetProps = { [key: string]: number };
 export type WidgetDraggableProps = {
@@ -5,7 +13,7 @@ export type WidgetDraggableProps = {
   widgetProps: WidgetProps;
 };
 export type CanvasWidgetProps = {
-  id: string
+  id: string;
   x: number;
   y: number;
   angle: number;

@@ -78,7 +78,17 @@ const MainCanvas: React.FC = () => {
       }
     };
 
-    const onRotating = () => {
+    const onRotating = (event: fabric.IEvent<Event>) => {
+      const { angle } = (event.transform as any).target;
+      if (event.target) {
+        if (angle % 45 < 10 || (angle - 360) % 45 > -10) {
+          const newAngle = Math.round(angle / 45) * 45;
+          (event.target as any)._setOriginToCenter();
+          event.target.set("angle", newAngle).setCoords();
+          (event.target as any)._resetOrigin();
+        }
+      }
+
       isObjectRotating = true;
     };
     const onMoving = () => {

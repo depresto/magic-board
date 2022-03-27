@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { fabric } from "fabric";
 import { useDrag, DragPreviewImage } from "react-dnd";
 import styled from "styled-components";
-import { WidgetDraggableProps } from "../../types/widget";
+import { WidgetDraggableProps, WidgetElementProps } from "../../types/widget";
 
 const defaultIntervalStart = 0;
 const defaultIntervalEnd = 1;
@@ -14,13 +14,7 @@ const StyledPreviewDiv = styled.div`
   cursor: pointer;
 `;
 
-type NumberLineToolProps = {
-  id?: string;
-  isPreview?: boolean;
-  canvas: fabric.Canvas | null;
-  initialX?: number;
-  initialY?: number;
-  initialAngle?: number;
+type NumberLineToolProps = WidgetElementProps & {
   intervalStart?: number;
   intervalEnd?: number;
   baseDominator?: number;
