@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useState } from "react";
 
-export type ToolboxProps = { x?: number; y?: number; minimize?: boolean };
+export type ToolboxProps = {
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  minimize?: boolean;
+};
 type ToolboxToolboxesProps = {
   [widgetType: string]: ToolboxProps;
 };
@@ -26,7 +32,10 @@ export const ToolboxProvider: React.FC = ({ children }) => {
   const setToolbox = (toolboxType: string, toolboxProps: ToolboxProps) => {
     setToolboxes((toolboxes) => {
       const newToolboxes = { ...toolboxes };
-      newToolboxes[toolboxType] = toolboxProps;
+      newToolboxes[toolboxType] = {
+        ...newToolboxes[toolboxType],
+        ...toolboxProps,
+      };
       return newToolboxes;
     });
   };

@@ -32,7 +32,8 @@ export type ModalProps = {
 };
 const ModalRoot: React.FC<ModalProps> = ({ title, type, children }) => {
   const { setModalRef } = useModelContext();
-  const { minimizeToolbox, closeToolbox } = useToolbox();
+  const { toolboxes, minimizeToolbox, closeToolbox, setToolbox } = useToolbox();
+  const currentToolbox = toolboxes[type];
 
   const onMinimize = () => {
     minimizeToolbox?.(type);
@@ -46,9 +47,24 @@ const ModalRoot: React.FC<ModalProps> = ({ title, type, children }) => {
     <Rnd
       dragHandleClassName="draggable-handle"
       bounds=".layout-content"
-      default={{ x: 10, y: 10, width: 500, height: 380 }}
+      default={{
+        x: currentToolbox.x || 10,
+        y: currentToolbox.y || 10,
+        width: currentToolbox.width || 500,
+        height: currentToolbox.height || 380,
+      }}
       minWidth={400}
       minHeight={380}
+      onDragStop={(event, position) => {
+        const { x, y } = position;
+        setToolbox?.(type, { x, y });
+      }}
+      onResizeStop={(event, direction, elementRef) => {
+        setToolbox?.(type, {
+          width: elementRef.clientWidth,
+          height: elementRef.clientHeight,
+        });
+      }}
     >
       <StyledModalDiv ref={setModalRef}>
         <div className="modal-container">

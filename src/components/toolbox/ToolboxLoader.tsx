@@ -16,7 +16,7 @@ const ToolboxLoader: React.FC = () => {
 
         switch (toolboxType as WidgetType) {
           case "number-line-tool":
-            return <NumberLineToolModal key={index} {...toolboxProps} />;
+            return <NumberLineToolModal key={index} />;
           default:
             return null;
         }
