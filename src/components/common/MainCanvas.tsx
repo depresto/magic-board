@@ -29,7 +29,12 @@ const StyledCanvasWrapper = styled.div`
   }
 `;
 const MainCanvas: React.FC = () => {
-  const { canvasWidgets, setCanvasWidget, setCanvasWidgetById } = useToolbox();
+  const {
+    canvasWidgets,
+    setCanvasWidget,
+    setCanvasWidgetById,
+    removeCanvasWidget,
+  } = useToolbox();
   const [collected, dropRef] = useDrop<WidgetDraggableProps>({
     accept: "widget",
     drop: (item, monitor) => {
@@ -132,6 +137,27 @@ const MainCanvas: React.FC = () => {
       }
     };
   }, [canvas, setCanvasWidgetById]);
+
+  useEffect(() => {
+    const onKeydown = (event: KeyboardEvent) => {
+      const activeObject = canvas?.getActiveObject();
+      switch (event.key) {
+        case "Backspace":
+        case "Delete":
+          if (activeObject?.name) {
+            canvas?.remove(activeObject);
+            removeCanvasWidget?.(activeObject.name);
+          }
+          break;
+        default:
+          break;
+      }
+    };
+    document.addEventListener("keydown", onKeydown);
+    return () => {
+      document.removeEventListener("keydown", onKeydown);
+    };
+  });
 
   useEffect(() => {
     const onWindowResize = () => {
