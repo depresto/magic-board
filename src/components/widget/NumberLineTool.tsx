@@ -15,10 +15,12 @@ const StyledPreviewDiv = styled.div`
 `;
 
 type NumberLineToolProps = {
+  id?: string;
   isPreview?: boolean;
   canvas: fabric.Canvas | null;
   initialX?: number;
   initialY?: number;
+  initialAngle?: number;
   intervalStart?: number;
   intervalEnd?: number;
   baseDominator?: number;
@@ -26,16 +28,19 @@ type NumberLineToolProps = {
   dominator?: number;
 };
 const NumberLineTool: React.FC<NumberLineToolProps> = ({
+  id,
   isPreview,
   canvas,
   initialX,
   initialY,
+  initialAngle,
   intervalStart = defaultIntervalStart,
   intervalEnd = defaultIntervalEnd,
   baseDominator = defaultBaseDominator,
   numerator = defaultNumerator,
   dominator = defaultDominator,
 }) => {
+  const [lineGroup, setLineGroup] = useState<fabric.Group | null>(null);
   const [imgRef, setImgRef] = useState<HTMLImageElement | null>(null);
   const [imgSrc, setImgSrc] = useState("");
 
@@ -147,34 +152,42 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
     }
 
     const lineGroup = new fabric.Group(lineGroupObjects, {
+      name: id,
       left: initialX || 0,
       top: initialY || 0,
+      angle: initialAngle || 0,
     });
-
-    if (imgRef) {
-      const dataUrl = lineGroup.toDataURL({});
-      setImgSrc(dataUrl);
-      imgRef.src = dataUrl;
-    }
-
-    if (canvas) {
-      canvas.add(lineGroup);
-    }
-
-    return () => {
-      if (canvas) {
-        canvas.remove(lineGroup);
-      }
-    };
+    setLineGroup(lineGroup);
   }, [
     baseDominator,
     canvas,
+    id,
     imgRef,
+    initialAngle,
     initialX,
     initialY,
     intervalEnd,
     intervalStart,
   ]);
+
+  useEffect(() => {
+    if (lineGroup && imgRef) {
+      const dataUrl = lineGroup.toDataURL({});
+      setImgSrc(dataUrl);
+      imgRef.src = dataUrl;
+    }
+  }, [imgRef, lineGroup]);
+
+  useEffect(() => {
+    if (lineGroup && canvas) {
+      canvas.add(lineGroup);
+    }
+    return () => {
+      if (lineGroup && canvas) {
+        canvas.remove(lineGroup);
+      }
+    };
+  }, [canvas, lineGroup]);
 
   if (isPreview) {
     return (
