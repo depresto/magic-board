@@ -5,6 +5,13 @@ import styled from "styled-components";
 import { WidgetDraggableProps, WidgetType } from "../../types/widget";
 import NumberLineTool from "../widget/NumberLineTool";
 
+fabric.Object.prototype.setControlsVisibility({
+  mb: false,
+  ml: false,
+  mr: false,
+  mt: false,
+});
+
 type CanvasWidgetProps = {
   x: number;
   y: number;
@@ -33,6 +40,8 @@ const MainCanvas: React.FC = () => {
     let canvas: fabric.Canvas | null = null;
     if (canvasRef) {
       canvas = new fabric.Canvas(canvasRef);
+      canvas.targetFindTolerance = 40;
+      canvas.perPixelTargetFind = true;
       setCanvas(canvas);
     }
     return () => {

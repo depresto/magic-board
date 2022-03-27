@@ -153,9 +153,6 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
 
     if (canvas) {
       canvas.add(lineGroup);
-      canvas.selection = true;
-      canvas.targetFindTolerance = 4;
-      canvas.perPixelTargetFind = true;
     }
 
     return () => {
