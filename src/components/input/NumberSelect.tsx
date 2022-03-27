@@ -20,12 +20,12 @@ const NumberSelect: React.FC<{
     }
   });
 
-  const defaultOptionValue = optionsValues.find(
-    (option) => option.value === defaultValue ?? 0
-  );
+  const defaultOptionValue = defaultValue
+    ? optionsValues.find((option) => option.value === defaultValue)
+    : optionsValues[0];
   const optionValue = value
     ? optionsValues.find((option) => option.value === value)
-    : undefined;
+    : defaultOptionValue;
 
   return (
     <Select

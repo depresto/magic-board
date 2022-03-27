@@ -41,30 +41,24 @@ const StyledButton = styled.button`
   }
 `;
 
-const defaultIntervalStart = 0;
-const defaultIntervalEnd = 1;
-const defaultBaseDominator = 4;
-const defaultNumerator = 1;
-const defaultDominator = 2;
-
 const NumberLineToolModal: React.FC = () => {
-  const [intervalStart, setIntervalStart] = useState(defaultIntervalStart);
-  const [intervalEnd, setIntervalEnd] = useState(defaultIntervalEnd);
+  const [intervalStart, setIntervalStart] = useState<number | undefined>();
+  const [intervalEnd, setIntervalEnd] = useState<number | undefined>();
 
-  const [baseDominator, setBaseDominator] = useState(defaultBaseDominator);
-  const [numerator, setNumerator] = useState(defaultNumerator);
-  const [dominator, setDominator] = useState(defaultDominator);
+  const [baseDominator, setBaseDominator] = useState<number | undefined>();
+  const [numerator, setNumerator] = useState<number | undefined>();
+  const [dominator, setDominator] = useState<number | undefined>();
 
   const onReset = () => {
-    setIntervalStart(defaultIntervalStart);
-    setIntervalEnd(defaultIntervalEnd);
-    setBaseDominator(defaultBaseDominator);
-    setNumerator(defaultNumerator);
-    setDominator(defaultDominator);
+    setIntervalStart(undefined);
+    setIntervalEnd(undefined);
+    setBaseDominator(undefined);
+    setNumerator(undefined);
+    setDominator(undefined);
   };
 
   return (
-    <ToolModal title="數線工具">
+    <ToolModal title="數線工具" type="number-line-tool">
       <StyledNumberLineToolContentDiv>
         <div className="d-flex justify-content-between align-items-center">
           <div>
@@ -75,7 +69,7 @@ const NumberLineToolModal: React.FC = () => {
                 value={intervalStart}
                 onChange={(intervalStart) => {
                   setIntervalStart(intervalStart);
-                  if (intervalStart >= intervalEnd) {
+                  if (!intervalEnd || intervalStart >= intervalEnd) {
                     setIntervalEnd(intervalStart + 1);
                   }
                 }}

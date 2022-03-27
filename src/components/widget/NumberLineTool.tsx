@@ -4,6 +4,12 @@ import { useDrag, DragPreviewImage } from "react-dnd";
 import styled from "styled-components";
 import { WidgetDraggableProps } from "../../types/widget";
 
+const defaultIntervalStart = 0;
+const defaultIntervalEnd = 1;
+const defaultBaseDominator = 4;
+const defaultNumerator = 1;
+const defaultDominator = 2;
+
 const StyledPreviewDiv = styled.div`
   cursor: pointer;
 `;
@@ -13,22 +19,22 @@ type NumberLineToolProps = {
   canvas: fabric.Canvas | null;
   initialX?: number;
   initialY?: number;
-  intervalStart: number;
-  intervalEnd: number;
-  baseDominator: number;
-  numerator: number;
-  dominator: number;
+  intervalStart?: number;
+  intervalEnd?: number;
+  baseDominator?: number;
+  numerator?: number;
+  dominator?: number;
 };
 const NumberLineTool: React.FC<NumberLineToolProps> = ({
   isPreview,
   canvas,
   initialX,
   initialY,
-  intervalStart,
-  intervalEnd,
-  baseDominator,
-  numerator,
-  dominator,
+  intervalStart = defaultIntervalStart,
+  intervalEnd = defaultIntervalEnd,
+  baseDominator = defaultBaseDominator,
+  numerator = defaultNumerator,
+  dominator = defaultDominator,
 }) => {
   const [imgRef, setImgRef] = useState<HTMLImageElement | null>(null);
   const [imgSrc, setImgSrc] = useState("");

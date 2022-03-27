@@ -3,6 +3,8 @@ import styled from "styled-components";
 import { Rnd } from "react-rnd";
 import ModalHeader from "./Header";
 import { ModalProvider, useModelContext } from "./ModalContext";
+import { WidgetType } from "../../../types/widget";
+import { useToolbox } from "../../../context/ToolboxContext";
 
 const StyledModalDiv = styled.div`
   background: #e5e5e5;
@@ -25,10 +27,20 @@ const StyledModalDiv = styled.div`
 `;
 
 export type ModalProps = {
+  type: WidgetType;
   title?: string;
 };
-const ModalRoot: React.FC<ModalProps> = ({ title, children }) => {
+const ModalRoot: React.FC<ModalProps> = ({ title, type, children }) => {
   const { setModalRef } = useModelContext();
+  const { minimizeToolbox, closeToolbox } = useToolbox();
+
+  const onMinimize = () => {
+    minimizeToolbox?.(type);
+  };
+
+  const onClose = () => {
+    closeToolbox?.(type);
+  };
 
   return (
     <Rnd
@@ -40,7 +52,9 @@ const ModalRoot: React.FC<ModalProps> = ({ title, children }) => {
     >
       <StyledModalDiv ref={setModalRef}>
         <div className="modal-container">
-          <ModalHeader>{title}</ModalHeader>
+          <ModalHeader onMinimize={onMinimize} onClose={onClose}>
+            {title}
+          </ModalHeader>
           <div className="modal-body">{children}</div>
         </div>
       </StyledModalDiv>
