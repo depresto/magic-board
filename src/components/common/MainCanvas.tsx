@@ -15,6 +15,8 @@ fabric.Object.prototype.setControlsVisibility({
 });
 
 const sidebarOffset = 100;
+const magnetAngle = 5;
+const magnetUnitAngle = 45;
 const StyledCanvasWrapper = styled.div`
   &,
   .wrapper {
@@ -80,12 +82,18 @@ const MainCanvas: React.FC = () => {
 
     const onRotating = (event: fabric.IEvent<Event>) => {
       const { angle } = (event.transform as any).target;
-      if (event.target) {
-        if (angle % 45 < 10 || (angle - 360) % 45 > -10) {
-          const newAngle = Math.round(angle / 45) * 45;
-          (event.target as any)._setOriginToCenter();
-          event.target.set("angle", newAngle).setCoords();
-          (event.target as any)._resetOrigin();
+      const object = event.target as any;
+
+      if (object) {
+        if (
+          angle % magnetUnitAngle < magnetAngle ||
+          (angle - 360) % magnetUnitAngle > -magnetAngle
+        ) {
+          const newAngle =
+            Math.round(angle / magnetUnitAngle) * magnetUnitAngle;
+          object._setOriginToCenter();
+          object.set("angle", newAngle).setCoords();
+          object._resetOrigin();
         }
       }
 
