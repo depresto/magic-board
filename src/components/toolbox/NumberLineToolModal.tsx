@@ -81,7 +81,7 @@ const NumberLineToolModal: React.FC = () => {
                 value={intervalEnd}
                 onChange={(intervalEnd) => {
                   setIntervalEnd(intervalEnd);
-                  if (!intervalStart || intervalStart >= intervalEnd) {
+                  if (intervalStart && intervalStart >= intervalEnd) {
                     setIntervalStart(intervalEnd - 1);
                   }
                 }}
