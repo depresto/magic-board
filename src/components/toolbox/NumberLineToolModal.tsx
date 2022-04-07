@@ -81,6 +81,9 @@ const NumberLineToolModal: React.FC = () => {
                 value={intervalEnd}
                 onChange={(intervalEnd) => {
                   setIntervalEnd(intervalEnd);
+                  if (!intervalStart || intervalStart >= intervalEnd) {
+                    setIntervalStart(intervalEnd - 1);
+                  }
                 }}
               />
             </div>
@@ -122,7 +125,7 @@ const NumberLineToolModal: React.FC = () => {
         </div>
       </StyledNumberLineToolContentDiv>
 
-      <StyledImageWrapper>
+      <StyledImageWrapper className="pt-2">
         <NumberLineTool
           isPreview
           canvas={null}

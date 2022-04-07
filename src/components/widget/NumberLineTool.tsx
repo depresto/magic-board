@@ -3,6 +3,7 @@ import { fabric } from "fabric";
 import { useDrag, DragPreviewImage } from "react-dnd";
 import styled from "styled-components";
 import { WidgetDraggableProps, WidgetElementProps } from "../../types/widget";
+import { widgetActiveColor, widgetColor } from ".";
 
 const defaultIntervalStart = 0;
 const defaultIntervalEnd = 1;
@@ -59,16 +60,21 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
     const fontSize = 28;
     const fontFamily = "san-serif";
 
-    const startX = 40;
-    const startY = 40;
+    const numberLineStartX = 40;
+    const numberLineStartY = 40;
     const numberLineWidth = 400;
     const numberLineHeight = 36;
     const numberLineGapHeight = 20;
     const arrowWidth = 20;
     const arrowLength = 8;
 
-    const totalGapCount = (intervalEnd - intervalStart) * baseDominator;
-    const lineGapWidth = numberLineWidth / totalGapCount;
+    const numberBarHeight = 20;
+    const numberBarGapWidth = 4;
+    const numberStartY = 0;
+
+    const numberLineTotalGapCount =
+      (intervalEnd - intervalStart) * baseDominator;
+    const numberLineGapWidth = numberLineWidth / numberLineTotalGapCount;
     const numberLineHeightGap = (numberLineHeight - numberLineGapHeight) / 2;
 
     const lineGroupObjects: fabric.Object[] = [];
@@ -78,17 +84,17 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
         stroke: lineStrokeColor,
         strokeWidth: lineStrokeWidth,
         strokeLineCap: lineStrokeLinCap,
-        left: startX,
-        top: startY + numberLineHeight / 2,
+        left: numberLineStartX,
+        top: numberLineStartY + numberLineHeight / 2,
       }
     );
     lineGroupObjects.push(baseLine);
 
     let counter = 0;
     for (
-      let currentX = startX;
-      currentX <= startX + numberLineWidth + lineGapWidth / 2;
-      currentX += lineGapWidth
+      let currentX = numberLineStartX;
+      currentX <= numberLineStartX + numberLineWidth + numberLineGapWidth / 2;
+      currentX += numberLineGapWidth
     ) {
       const isCurrentInteger = counter % baseDominator === 0;
       const line = new fabric.Line(
@@ -105,7 +111,9 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
           strokeWidth: lineStrokeWidth,
           strokeLineCap: lineStrokeLinCap,
           left: currentX,
-          top: isCurrentInteger ? startY : startY + numberLineHeightGap,
+          top: isCurrentInteger
+            ? numberLineStartY
+            : numberLineStartY + numberLineHeightGap,
         }
       );
       lineGroupObjects.push(line);
@@ -116,15 +124,15 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
       stroke: lineStrokeColor,
       strokeWidth: lineStrokeWidth,
       strokeLineCap: lineStrokeLinCap,
-      left: startX + numberLineWidth + arrowWidth,
-      top: startY + numberLineHeight / 2 - arrowLength,
+      left: numberLineStartX + numberLineWidth + arrowWidth,
+      top: numberLineStartY + numberLineHeight / 2 - arrowLength,
     });
     const arrowLower = new fabric.Line([0, arrowLength, arrowLength, 0], {
       stroke: lineStrokeColor,
       strokeWidth: lineStrokeWidth,
       strokeLineCap: lineStrokeLinCap,
-      left: startX + numberLineWidth + arrowWidth,
-      top: startY + numberLineHeight / 2,
+      left: numberLineStartX + numberLineWidth + arrowWidth,
+      top: numberLineStartY + numberLineHeight / 2,
     });
     lineGroupObjects.push(arrowUpper);
     lineGroupObjects.push(arrowLower);
@@ -138,14 +146,37 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
       const line = new fabric.Text(integerCounter.toString(), {
         fontSize,
         fontFamily,
-        left: startX + counter * lineGapWidth * baseDominator - 8,
-        top: startY + numberLineHeight + 6,
+        left:
+          numberLineStartX + counter * numberLineGapWidth * baseDominator - 8,
+        top: numberLineStartY + numberLineHeight + 6,
       });
       lineGroupObjects.push(line);
       counter += 1;
     }
+    const basicLineGroup = new fabric.Group(lineGroupObjects);
 
-    const lineGroup = new fabric.Group(lineGroupObjects, {
+    const numberBarObjects: fabric.Object[] = [];
+    const numberBarTotalGapCount = (intervalEnd - intervalStart) * dominator;
+    const numberBarWidth = numberLineWidth / numberBarTotalGapCount;
+    counter = 0;
+    for (
+      let currentX = numberLineStartX;
+      currentX < numberLineStartX + numberLineWidth;
+      currentX += numberBarWidth
+    ) {
+      const rect = new fabric.Rect({
+        fill: numerator <= counter ? widgetColor : widgetActiveColor,
+        width: numberBarWidth - numberBarGapWidth,
+        height: numberBarHeight,
+        left: currentX + numberBarGapWidth / 2,
+        top: numberStartY,
+      });
+      numberBarObjects.push(rect);
+      counter += 1;
+    }
+    const numberLineGroup = new fabric.Group(numberBarObjects);
+
+    const lineGroup = new fabric.Group([basicLineGroup, numberLineGroup], {
       name: id,
       left: initialX || 0,
       top: initialY || 0,
@@ -155,6 +186,7 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
   }, [
     baseDominator,
     canvas,
+    dominator,
     id,
     imgRef,
     initialAngle,
@@ -162,6 +194,7 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
     initialY,
     intervalEnd,
     intervalStart,
+    numerator,
   ]);
 
   useEffect(() => {
