@@ -3,8 +3,8 @@ import styled from "styled-components";
 import { Rnd } from "react-rnd";
 import ModalHeader from "./Header";
 import { ModalProvider, useModelContext } from "./ModalContext";
-import { WidgetType } from "../../../types/widget";
 import { useToolbox } from "../../../context/ToolboxContext";
+import { ToolboxType } from "../../../types/toolbox";
 
 const StyledModalDiv = styled.div`
   background: #e5e5e5;
@@ -27,7 +27,7 @@ const StyledModalDiv = styled.div`
 `;
 
 export type ModalProps = {
-  type: WidgetType;
+  type: ToolboxType;
   title?: string;
 };
 const ModalRoot: React.FC<ModalProps> = ({ title, type, children }) => {

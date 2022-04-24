@@ -4,7 +4,7 @@ import { ReactComponent as ComponentCircleSvg } from "../../assets/images/sideba
 import { ReactComponent as ComponentSquareSvg } from "../../assets/images/sidebar/component-square.svg";
 import { ReactComponent as ComponentLineSvg } from "../../assets/images/sidebar/component-line.svg";
 import { useToolbox } from "../../context/ToolboxContext";
-import { WidgetType } from "../../types/widget";
+import { ToolboxType } from "../../types/toolbox";
 
 const StyledSidebar = styled.div`
   width: 100px;
@@ -41,7 +41,7 @@ const StyledModalButton = styled.button<{ $active?: boolean }>`
 const Sidebar: React.FC = () => {
   const { toolboxes, setToolbox } = useToolbox();
 
-  const onClickToolbox = (toolboxType: WidgetType) => {
+  const onClickToolbox = (toolboxType: ToolboxType) => {
     if (toolboxes[toolboxType]) {
       const toolboxProps = toolboxes[toolboxType];
       toolboxProps.minimize = false;

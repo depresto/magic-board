@@ -6,7 +6,7 @@ export type WidgetElementProps = {
   initialY?: number;
   initialAngle?: number;
 };
-export type WidgetType = "number-line-tool";
+export type WidgetType = "number-line" | "number-line-bar";
 export type WidgetProps = { [key: string]: number };
 export type WidgetDraggableProps = {
   widgetType: WidgetType;

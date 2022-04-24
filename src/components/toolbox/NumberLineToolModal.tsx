@@ -4,7 +4,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRotateLeft } from "@fortawesome/free-solid-svg-icons";
 import ToolModal from "../common/ToolModal";
 import NumberSelect from "../input/NumberSelect";
-import NumberLineTool from "../widget/NumberLineTool";
+import NumberLine from "../widget/NumberLine";
+import NumberLineBar from "../widget/NumberLineBar";
 
 const StyledNumberLineToolContentDiv = styled.div`
   background-color: #c4c4c4;
@@ -19,6 +20,7 @@ const StyledDividerLineDiv = styled.div`
 `;
 const StyledImageWrapper = styled.div`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
@@ -88,20 +90,16 @@ const NumberLineToolModal: React.FC = () => {
               />
             </div>
             <div className="d-flex align-items-center mb-2">
-              <span className="label mr-2">切割參考線</span>
-              <div className="d-flex flex-column align-items-center">
-                <span>1</span>
-                <StyledDividerLineDiv />
-                <NumberSelect
-                  defaultValue={4}
-                  startIndex={1}
-                  value={baseDominator}
-                  onChange={setBaseDominator}
-                />
-              </div>
+              <span className="label mr-4">切割數</span>
+              <NumberSelect
+                defaultValue={4}
+                startIndex={1}
+                value={baseDominator}
+                onChange={setBaseDominator}
+              />
             </div>
             <div className="d-flex align-items-center">
-              <span className="label mr-4">等值分數</span>
+              <span className="label mr-4">分數</span>
               <div className="d-flex flex-column align-items-center">
                 <NumberSelect
                   defaultValue={1}
@@ -126,7 +124,7 @@ const NumberLineToolModal: React.FC = () => {
       </StyledNumberLineToolContentDiv>
 
       <StyledImageWrapper className="pt-2">
-        <NumberLineTool
+        <NumberLineBar
           isPreview
           canvas={null}
           intervalStart={intervalStart}
@@ -134,6 +132,13 @@ const NumberLineToolModal: React.FC = () => {
           baseDominator={baseDominator}
           numerator={numerator}
           dominator={dominator}
+        />
+        <NumberLine
+          isPreview
+          canvas={null}
+          intervalStart={intervalStart}
+          intervalEnd={intervalEnd}
+          baseDominator={baseDominator}
         />
       </StyledImageWrapper>
     </ToolModal>

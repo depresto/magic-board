@@ -3,26 +3,22 @@ import { fabric } from "fabric";
 import { useDrag, DragPreviewImage } from "react-dnd";
 import styled from "styled-components";
 import { WidgetDraggableProps, WidgetElementProps } from "../../types/widget";
-import { widgetActiveColor, widgetColor } from ".";
 
 const defaultIntervalStart = 0;
 const defaultIntervalEnd = 1;
 const defaultBaseDominator = 4;
-const defaultNumerator = 1;
-const defaultDominator = 2;
 
 const StyledPreviewDiv = styled.div`
   cursor: pointer;
+  padding: 0 20px 0 40px;
 `;
 
-type NumberLineToolProps = WidgetElementProps & {
+type NumberLineProps = WidgetElementProps & {
   intervalStart?: number;
   intervalEnd?: number;
   baseDominator?: number;
-  numerator?: number;
-  dominator?: number;
 };
-const NumberLineTool: React.FC<NumberLineToolProps> = ({
+const NumberLine: React.FC<NumberLineProps> = ({
   id,
   isPreview,
   canvas,
@@ -32,8 +28,6 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
   intervalStart = defaultIntervalStart,
   intervalEnd = defaultIntervalEnd,
   baseDominator = defaultBaseDominator,
-  numerator = defaultNumerator,
-  dominator = defaultDominator,
 }) => {
   const [lineGroup, setLineGroup] = useState<fabric.Group | null>(null);
   const [imgRef, setImgRef] = useState<HTMLImageElement | null>(null);
@@ -42,13 +36,11 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
   const [imgCollected, dragImgRef, preview] = useDrag<WidgetDraggableProps>({
     type: "widget",
     item: {
-      widgetType: "number-line-tool",
+      widgetType: "number-line",
       widgetProps: {
         intervalStart,
         intervalEnd,
         baseDominator,
-        numerator,
-        dominator,
       },
     },
   });
@@ -67,10 +59,6 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
     const numberLineGapHeight = 20;
     const arrowWidth = 20;
     const arrowLength = 8;
-
-    const numberBarHeight = 20;
-    const numberBarGapWidth = 4;
-    const numberStartY = 0;
 
     const numberLineTotalGapCount =
       (intervalEnd - intervalStart) * baseDominator;
@@ -153,30 +141,8 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
       lineGroupObjects.push(line);
       counter += 1;
     }
-    const basicLineGroup = new fabric.Group(lineGroupObjects);
 
-    const numberBarObjects: fabric.Object[] = [];
-    const numberBarTotalGapCount = (intervalEnd - intervalStart) * dominator;
-    const numberBarWidth = numberLineWidth / numberBarTotalGapCount;
-    counter = 0;
-    for (
-      let currentX = numberLineStartX;
-      currentX < numberLineStartX + numberLineWidth;
-      currentX += numberBarWidth
-    ) {
-      const rect = new fabric.Rect({
-        fill: numerator <= counter ? widgetColor : widgetActiveColor,
-        width: numberBarWidth - numberBarGapWidth,
-        height: numberBarHeight,
-        left: currentX + numberBarGapWidth / 2,
-        top: numberStartY,
-      });
-      numberBarObjects.push(rect);
-      counter += 1;
-    }
-    const numberLineGroup = new fabric.Group(numberBarObjects);
-
-    const lineGroup = new fabric.Group([basicLineGroup, numberLineGroup], {
+    const lineGroup = new fabric.Group(lineGroupObjects, {
       name: id,
       left: initialX || 0,
       top: initialY || 0,
@@ -185,16 +151,12 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
     setLineGroup(lineGroup);
   }, [
     baseDominator,
-    canvas,
-    dominator,
     id,
-    imgRef,
     initialAngle,
     initialX,
     initialY,
     intervalEnd,
     intervalStart,
-    numerator,
   ]);
 
   useEffect(() => {
@@ -228,4 +190,4 @@ const NumberLineTool: React.FC<NumberLineToolProps> = ({
   return <div></div>;
 };
 
-export default NumberLineTool;
+export default NumberLine;

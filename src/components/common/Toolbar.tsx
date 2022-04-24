@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { ReactComponent as MenuIconSvg } from "../../assets/images/icon/menu.svg";
 import { ToolboxProps, useToolbox } from "../../context/ToolboxContext";
-import { WidgetType } from "../../types/widget";
+import { ToolboxType } from "../../types/toolbox";
 
 const StyledToolbar = styled.div`
   height: var(--toolbar-height);
@@ -46,7 +46,7 @@ const Toolbar: React.FC = () => {
   const { toolboxes, showToolbox, minimizeToolbox } = useToolbox();
 
   const onSwitchToolbox = (
-    toolboxType: WidgetType,
+    toolboxType: ToolboxType,
     currentToolboxProps: ToolboxProps | undefined
   ) => {
     if (currentToolboxProps?.minimize) {
@@ -64,7 +64,7 @@ const Toolbar: React.FC = () => {
 
       <div>
         {Object.keys(toolboxes).map((toolboxType, index) => {
-          const type = toolboxType as WidgetType;
+          const type = toolboxType as ToolboxType;
           const toolboxProps = toolboxes[toolboxType];
 
           switch (type) {

@@ -4,8 +4,9 @@ import { fabric } from "fabric";
 import styled from "styled-components";
 import { nanoid } from "nanoid";
 import { WidgetDraggableProps } from "../../types/widget";
-import NumberLineTool from "../widget/NumberLineTool";
+import NumberLine from "../widget/NumberLine";
 import { useToolbox } from "../../context/ToolboxContext";
+import NumberLineBar from "../widget/NumberLineBar";
 
 fabric.Object.prototype.setControlsVisibility({
   mb: false,
@@ -186,9 +187,21 @@ const MainCanvas: React.FC = () => {
         <canvas ref={setCanvasRef}></canvas>
         {canvasWidgets.map((canvasWidget) => {
           switch (canvasWidget.type) {
-            case "number-line-tool":
+            case "number-line":
               return (
-                <NumberLineTool
+                <NumberLine
+                  key={canvasWidget.id}
+                  id={canvasWidget.id}
+                  canvas={canvas}
+                  initialX={canvasWidget.x}
+                  initialY={canvasWidget.y}
+                  initialAngle={canvasWidget.angle}
+                  {...(canvasWidget.props as any)}
+                />
+              );
+            case "number-line-bar":
+              return (
+                <NumberLineBar
                   key={canvasWidget.id}
                   id={canvasWidget.id}
                   canvas={canvas}

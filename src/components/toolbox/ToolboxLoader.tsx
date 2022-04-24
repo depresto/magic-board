@@ -1,6 +1,6 @@
 import React from "react";
 import { useToolbox } from "../../context/ToolboxContext";
-import { WidgetType } from "../../types/widget";
+import { ToolboxType } from "../../types/toolbox";
 import NumberLineToolModal from "./NumberLineToolModal";
 
 const ToolboxLoader: React.FC = () => {
@@ -14,7 +14,7 @@ const ToolboxLoader: React.FC = () => {
           return null;
         }
 
-        switch (toolboxType as WidgetType) {
+        switch (toolboxType as ToolboxType) {
           case "number-line-tool":
             return <NumberLineToolModal key={index} />;
           default:
