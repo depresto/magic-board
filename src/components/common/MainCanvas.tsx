@@ -7,15 +7,19 @@ import { WidgetDraggableProps } from "../../types/widget";
 import NumberLine from "../widget/NumberLine";
 import { useToolbox } from "../../context/ToolboxContext";
 import NumberLineBar from "../widget/NumberLineBar";
+import { notEmpty } from "../../helpers";
 
 fabric.Object.prototype.setControlsVisibility({
   mb: false,
   ml: false,
   mr: false,
   mt: false,
+  bl: false,
+  br: false,
+  tl: false,
+  tr: false,
 });
 
-const sidebarOffset = 100;
 const magnetAngle = 5;
 const magnetUnitAngle = 45;
 const StyledCanvasWrapper = styled.div`
@@ -34,7 +38,7 @@ const MainCanvas: React.FC = () => {
     canvasWidgets,
     setCanvasWidget,
     setCanvasWidgetById,
-    removeCanvasWidget,
+    removeCanvasWidgets,
   } = useToolbox();
   const [collected, dropRef] = useDrop<WidgetDraggableProps>({
     accept: "widget",
@@ -44,7 +48,7 @@ const MainCanvas: React.FC = () => {
       if (clientOffset) {
         setCanvasWidget?.({
           id: nanoid(),
-          x: clientOffset.x - sidebarOffset,
+          x: clientOffset.x,
           y: clientOffset.y,
           angle: 0,
           type: item.widgetType,
@@ -141,13 +145,14 @@ const MainCanvas: React.FC = () => {
 
   useEffect(() => {
     const onKeydown = (event: KeyboardEvent) => {
-      const activeObject = canvas?.getActiveObject();
+      const activeObjects = canvas?.getActiveObjects();
       switch (event.key) {
         case "Backspace":
         case "Delete":
-          if (activeObject?.name) {
-            canvas?.remove(activeObject);
-            removeCanvasWidget?.(activeObject.name);
+          if (activeObjects) {
+            canvas?.remove(...activeObjects);
+            const widgetIds = activeObjects.map(activeObject => activeObject.name).filter(notEmpty)
+            removeCanvasWidgets?.(widgetIds)
           }
           break;
         default:

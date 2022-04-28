@@ -55,7 +55,7 @@ const NumberLineBar: React.FC<NumberLineBarProps> = ({
   });
 
   useEffect(() => {
-    const numberLineStartX = 40;
+    const numberLineStartX = 0;
     const numberLineWidth = 400;
 
     const numberBarHeight = 20;

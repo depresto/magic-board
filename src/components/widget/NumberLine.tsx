@@ -52,8 +52,8 @@ const NumberLine: React.FC<NumberLineProps> = ({
     const fontSize = 28;
     const fontFamily = "san-serif";
 
-    const numberLineStartX = 40;
-    const numberLineStartY = 40;
+    const numberLineStartX = 0;
+    const numberLineStartY = 0;
     const numberLineWidth = 400;
     const numberLineHeight = 36;
     const numberLineGapHeight = 20;
@@ -122,8 +122,11 @@ const NumberLine: React.FC<NumberLineProps> = ({
       left: numberLineStartX + numberLineWidth + arrowWidth,
       top: numberLineStartY + numberLineHeight / 2,
     });
-    lineGroupObjects.push(arrowUpper);
-    lineGroupObjects.push(arrowLower);
+    const arrowObject = new fabric.Group([arrowUpper, arrowLower]);
+    arrowObject.on('mouse:over', e => {
+      console.log(e)
+    })
+    lineGroupObjects.push(arrowObject);
 
     counter = 0;
     for (

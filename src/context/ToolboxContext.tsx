@@ -23,7 +23,7 @@ type ToolboxContextProps = {
     id: string,
     canvasWidget: Partial<CanvasWidgetProps>
   ) => void;
-  removeCanvasWidget?: (id: string) => void;
+  removeCanvasWidgets?: (ids: string[]) => void;
 };
 const initialToolboxContextProps = {
   toolboxes: {},
@@ -109,9 +109,9 @@ export const ToolboxProvider: React.FC = ({ children }) => {
     });
   };
 
-  const removeCanvasWidget = (id: string) => {
+  const removeCanvasWidgets = (ids: string[]) => {
     setCanvasWidgets((canvasWidgets) => {
-      return canvasWidgets.filter((widget) => widget.id !== id);
+      return canvasWidgets.filter((widget) => !ids.includes(widget.id));
     });
   };
 
@@ -141,7 +141,7 @@ export const ToolboxProvider: React.FC = ({ children }) => {
         closeToolbox,
         setCanvasWidget,
         setCanvasWidgetById,
-        removeCanvasWidget,
+        removeCanvasWidgets,
       }}
     >
       {children}
