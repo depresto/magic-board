@@ -7,7 +7,7 @@ export type WidgetElementProps = {
   initialAngle?: number;
 };
 export type WidgetType = "number-line" | "number-line-bar";
-export type WidgetProps = { [key: string]: number };
+export type WidgetProps = { [key: string]: number | undefined };
 export type WidgetDraggableProps = {
   widgetType: WidgetType;
   widgetProps: WidgetProps;
@@ -18,5 +18,5 @@ export type CanvasWidgetProps = {
   y: number;
   angle: number;
   type: WidgetType;
-  props: { [key: string]: number };
+  props: WidgetProps;
 };

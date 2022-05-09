@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { fabric } from "fabric";
-import { useDrag, DragPreviewImage } from "react-dnd";
-import styled from "styled-components";
-import { WidgetDraggableProps, WidgetElementProps } from "../../types/widget";
-import { widgetActiveColor, widgetColor } from ".";
+import * as PIXI from "pixi.js";
+import { widgetColorHex } from ".";
+import WidgetElement, { WidgetElementProps } from "./WidgetElement";
 
 const defaultIntervalStart = 0;
 const defaultIntervalEnd = 1;
@@ -11,10 +8,12 @@ const defaultBaseDominator = 4;
 const defaultNumerator = 1;
 const defaultDominator = 2;
 
-const StyledPreviewDiv = styled.div`
-  cursor: pointer;
-  padding: 0 44px 0 48px;
-`;
+const numberLineStartX = 0;
+const numberLineWidth = 400;
+
+const numberBarHeight = 20;
+const numberBarGapWidth = 4;
+const numberStartY = 0;
 
 type NumberLineBarProps = WidgetElementProps & {
   intervalStart?: number;
@@ -23,103 +22,45 @@ type NumberLineBarProps = WidgetElementProps & {
   numerator?: number;
   dominator?: number;
 };
-const NumberLineBar: React.FC<NumberLineBarProps> = ({
-  id,
-  isPreview,
-  canvas,
-  initialX,
-  initialY,
-  initialAngle,
-  intervalStart = defaultIntervalStart,
-  intervalEnd = defaultIntervalEnd,
-  baseDominator = defaultBaseDominator,
-  numerator = defaultNumerator,
-  dominator = defaultDominator,
-}) => {
-  const [lineGroup, setLineGroup] = useState<fabric.Group | null>(null);
-  const [imgRef, setImgRef] = useState<HTMLImageElement | null>(null);
-  const [imgSrc, setImgSrc] = useState("");
 
-  const [imgCollected, dragImgRef, preview] = useDrag<WidgetDraggableProps>({
-    type: "widget",
-    item: {
-      widgetType: "number-line-bar",
-      widgetProps: {
-        intervalStart,
-        intervalEnd,
-        baseDominator,
-        numerator,
-        dominator,
-      },
-    },
-  });
+class NumberLineBar extends WidgetElement {
+  intervalStart: number;
+  intervalEnd: number;
+  baseDominator: number;
+  numerator: number;
+  dominator: number;
 
-  useEffect(() => {
-    const numberLineStartX = 0;
-    const numberLineWidth = 400;
+  constructor(options: NumberLineBarProps) {
+    super(options);
+    this.intervalStart = options.intervalStart ?? defaultIntervalStart;
+    this.intervalEnd = options.intervalStart ?? defaultIntervalEnd;
+    this.baseDominator = options.baseDominator ?? defaultBaseDominator;
+    this.numerator = options.numerator ?? defaultNumerator;
+    this.dominator = options.dominator ?? defaultDominator;
 
-    const numberBarHeight = 20;
-    const numberBarGapWidth = 4;
-    const numberStartY = 0;
-
-    const numberBarObjects: fabric.Object[] = [];
-    const numberBarTotalGapCount = (intervalEnd - intervalStart) * dominator;
+    const numberBarTotalGapCount =
+      (this.intervalEnd - this.intervalStart) * this.dominator;
     const numberBarWidth = numberLineWidth / numberBarTotalGapCount;
+
     let counter = 0;
     for (
       let currentX = numberLineStartX;
       currentX < numberLineStartX + numberLineWidth;
       currentX += numberBarWidth
     ) {
-      const rect = new fabric.Rect({
-        fill: numerator <= counter ? widgetColor : widgetActiveColor,
-        width: numberBarWidth - numberBarGapWidth,
-        height: numberBarHeight,
-        left: currentX + numberBarGapWidth / 2,
-        top: numberStartY,
-      });
-      numberBarObjects.push(rect);
+      const rect = new PIXI.Graphics();
+      rect.beginFill(widgetColorHex);
+      rect.alpha = this.numerator <= counter ? 0.8 : 0.2;
+      rect.drawRect(
+        currentX + numberBarGapWidth / 2,
+        numberStartY,
+        numberBarWidth - numberBarGapWidth,
+        numberBarHeight
+      );
+      this.addChild(rect);
       counter += 1;
     }
-
-    const lineGroup = new fabric.Group(numberBarObjects, {
-      name: id,
-      left: initialX || 0,
-      top: initialY || 0,
-      angle: initialAngle || 0,
-    });
-    setLineGroup(lineGroup);
-  }, [dominator, id, initialAngle, initialX, initialY, intervalEnd, intervalStart, numerator]);
-
-  useEffect(() => {
-    if (lineGroup && imgRef) {
-      const dataUrl = lineGroup.toDataURL({});
-      setImgSrc(dataUrl);
-      imgRef.src = dataUrl;
-    }
-  }, [imgRef, lineGroup]);
-
-  useEffect(() => {
-    if (lineGroup && canvas) {
-      canvas.add(lineGroup);
-    }
-    return () => {
-      if (lineGroup && canvas) {
-        canvas.remove(lineGroup);
-      }
-    };
-  }, [canvas, lineGroup]);
-
-  if (isPreview) {
-    return (
-      <StyledPreviewDiv ref={dragImgRef} {...imgCollected}>
-        <DragPreviewImage connect={preview} src={imgSrc} />
-        <img ref={setImgRef} alt="" />
-      </StyledPreviewDiv>
-    );
   }
-
-  return <div></div>;
-};
+}
 
 export default NumberLineBar;

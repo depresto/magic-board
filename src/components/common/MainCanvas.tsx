@@ -3,11 +3,14 @@ import { useDrop } from "react-dnd";
 import { fabric } from "fabric";
 import styled from "styled-components";
 import { nanoid } from "nanoid";
+import * as PIXI from "pixi.js";
+import { Transformer } from "@pixi-essentials/transformer";
 import { WidgetDraggableProps } from "../../types/widget";
 import NumberLine from "../widget/NumberLine";
 import { useToolbox } from "../../context/ToolboxContext";
 import NumberLineBar from "../widget/NumberLineBar";
 import { notEmpty } from "../../helpers";
+import WidgetElement from "../widget/WidgetElement";
 
 fabric.Object.prototype.setControlsVisibility({
   mb: false,
@@ -25,10 +28,6 @@ const magnetUnitAngle = 45;
 const StyledCanvasWrapper = styled.div`
   &,
   .wrapper {
-    width: 100%;
-    height: 100%;
-  }
-  canvas {
     width: 100%;
     height: 100%;
   }
@@ -62,21 +61,51 @@ const MainCanvas: React.FC = () => {
 
   const [canvasWrapperRef, setCanvasWrapperRef] =
     useState<HTMLDivElement | null>(null);
-  const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
+  const [pixiApp, setPixiApp] = useState<PIXI.Application | null>(null);
   useEffect(() => {
-    let canvas: fabric.Canvas | null = null;
-    if (canvasRef) {
-      canvas = new fabric.Canvas(canvasRef);
-      canvas.targetFindTolerance = 40;
-      canvas.perPixelTargetFind = true;
-      setCanvas(canvas);
+    let app: PIXI.Application | null = null;
+    if (canvasWrapperRef) {
+      app = new PIXI.Application({ backgroundAlpha: 0 });
+      app.resizeTo = canvasWrapperRef;
+      canvasWrapperRef.appendChild(app.view);
+      app.stage.addChild(new Transformer());
+      setPixiApp(app);
     }
+
     return () => {
-      setCanvas(null);
-      canvas?.dispose();
+      if (app) {
+        app.destroy(true, true);
+      }
     };
-  }, [canvasRef]);
+  }, [canvasWrapperRef]);
+
+  useEffect(() => {
+    if (pixiApp?.stage && canvasWidgets.length > 0) {
+      for (const canvasWidget of canvasWidgets) {
+        let Widget: typeof WidgetElement | null = null;
+        switch (canvasWidget.type) {
+          case "number-line":
+            Widget = NumberLine;
+            break;
+          case "number-line-bar":
+            Widget = NumberLineBar;
+            break;
+        }
+
+        if (!Widget) {
+          continue;
+        }
+        const widget = new Widget({
+          id: canvasWidget.id,
+          initialX: canvasWidget.x,
+          initialY: canvasWidget.y,
+          ...canvasWidget.props,
+        });
+        pixiApp.stage.addChild(widget);
+      }
+    }
+  }, [canvasWidgets, pixiApp]);
 
   useEffect(() => {
     let isObjectMoving = false;
@@ -151,8 +180,10 @@ const MainCanvas: React.FC = () => {
         case "Delete":
           if (activeObjects) {
             canvas?.remove(...activeObjects);
-            const widgetIds = activeObjects.map(activeObject => activeObject.name).filter(notEmpty)
-            removeCanvasWidgets?.(widgetIds)
+            const widgetIds = activeObjects
+              .map((activeObject) => activeObject.name)
+              .filter(notEmpty);
+            removeCanvasWidgets?.(widgetIds);
           }
           break;
         default:
@@ -165,62 +196,9 @@ const MainCanvas: React.FC = () => {
     };
   });
 
-  useEffect(() => {
-    const onWindowResize = () => {
-      if (canvasWrapperRef) {
-        const width = canvasWrapperRef.clientWidth;
-        const height = canvasWrapperRef.clientHeight;
-        const context = canvas?.getContext();
-
-        if (canvas && context) {
-          canvas.setWidth(width);
-          canvas.setHeight(height);
-        }
-      }
-    };
-    onWindowResize();
-
-    window.addEventListener("resize", onWindowResize);
-    return () => {
-      window.removeEventListener("resize", onWindowResize);
-    };
-  });
-
   return (
     <StyledCanvasWrapper ref={dropRef} {...collected}>
-      <div className="wrapper" ref={setCanvasWrapperRef}>
-        <canvas ref={setCanvasRef}></canvas>
-        {canvasWidgets.map((canvasWidget) => {
-          switch (canvasWidget.type) {
-            case "number-line":
-              return (
-                <NumberLine
-                  key={canvasWidget.id}
-                  id={canvasWidget.id}
-                  canvas={canvas}
-                  initialX={canvasWidget.x}
-                  initialY={canvasWidget.y}
-                  initialAngle={canvasWidget.angle}
-                  {...(canvasWidget.props as any)}
-                />
-              );
-            case "number-line-bar":
-              return (
-                <NumberLineBar
-                  key={canvasWidget.id}
-                  id={canvasWidget.id}
-                  canvas={canvas}
-                  initialX={canvasWidget.x}
-                  initialY={canvasWidget.y}
-                  initialAngle={canvasWidget.angle}
-                  {...(canvasWidget.props as any)}
-                />
-              );
-            default:
-              return null;
-          }
-        })}
-      </div>
+      <div className="wrapper" ref={setCanvasWrapperRef}></div>
     </StyledCanvasWrapper>
   );
 };

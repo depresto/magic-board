@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRotateLeft } from "@fortawesome/free-solid-svg-icons";
@@ -6,6 +6,17 @@ import ToolModal from "../common/ToolModal";
 import NumberSelect from "../input/NumberSelect";
 import NumberLine from "../widget/NumberLine";
 import NumberLineBar from "../widget/NumberLineBar";
+import { DragPreviewImage, useDrag } from "react-dnd";
+import { WidgetDraggableProps } from "../../types/widget";
+
+const StyledNumberLineBarPreviewDiv = styled.div`
+  cursor: pointer;
+  padding: 0 44px 0 48px;
+`;
+const StyledNumberLinePreviewDiv = styled.div`
+  cursor: pointer;
+  padding: 0 20px 0 40px;
+`;
 
 const StyledNumberLineToolContentDiv = styled.div`
   background-color: #c4c4c4;
@@ -58,6 +69,63 @@ const NumberLineToolModal: React.FC = () => {
     setNumerator(undefined);
     setDominator(undefined);
   };
+
+  const [numberLineBarPreviewUrl, setNumberLineBarPreviewUrl] = useState<
+    string | null
+  >(null);
+  useEffect(() => {
+    const numberLineBar = new NumberLineBar({
+      intervalStart,
+      intervalEnd,
+      baseDominator,
+      numerator,
+      dominator,
+    });
+    setNumberLineBarPreviewUrl(numberLineBar.toImageUrl());
+  }, [baseDominator, dominator, intervalEnd, intervalStart, numerator]);
+
+  const [numberLinePreviewUrl, setNumberLinePreviewUrl] = useState<
+    string | null
+  >(null);
+  useEffect(() => {
+    const numberLine = new NumberLine({
+      intervalStart,
+      intervalEnd,
+      baseDominator,
+    });
+    setNumberLinePreviewUrl(numberLine.toImageUrl());
+  }, [baseDominator, intervalEnd, intervalStart]);
+
+  const [
+    numberLineBarImgCollected,
+    numberLineBarDragImgRef,
+    numberLineBarPreview,
+  ] = useDrag<WidgetDraggableProps>({
+    type: "widget",
+    item: {
+      widgetType: "number-line-bar",
+      widgetProps: {
+        intervalStart,
+        intervalEnd,
+        baseDominator,
+        numerator,
+        dominator,
+      },
+    },
+  });
+
+  const [numberLineImgCollected, numberLineDragImgRef, numberLinePreview] =
+    useDrag<WidgetDraggableProps>({
+      type: "widget",
+      item: {
+        widgetType: "number-line",
+        widgetProps: {
+          intervalStart,
+          intervalEnd,
+          baseDominator,
+        },
+      },
+    });
 
   return (
     <ToolModal title="數線工具" type="number-line-tool">
@@ -124,22 +192,31 @@ const NumberLineToolModal: React.FC = () => {
       </StyledNumberLineToolContentDiv>
 
       <StyledImageWrapper className="pt-2">
-        <NumberLineBar
-          isPreview
-          canvas={null}
-          intervalStart={intervalStart}
-          intervalEnd={intervalEnd}
-          baseDominator={baseDominator}
-          numerator={numerator}
-          dominator={dominator}
-        />
-        <NumberLine
-          isPreview
-          canvas={null}
-          intervalStart={intervalStart}
-          intervalEnd={intervalEnd}
-          baseDominator={baseDominator}
-        />
+        {numberLineBarPreviewUrl && (
+          <StyledNumberLineBarPreviewDiv
+            ref={numberLineBarDragImgRef}
+            {...numberLineBarImgCollected}
+          >
+            <DragPreviewImage
+              connect={numberLineBarPreview}
+              src={numberLineBarPreviewUrl}
+            />
+            <img src={numberLineBarPreviewUrl} alt="" />
+          </StyledNumberLineBarPreviewDiv>
+        )}
+
+        {numberLinePreviewUrl && (
+          <StyledNumberLinePreviewDiv
+            ref={numberLineDragImgRef}
+            {...numberLineImgCollected}
+          >
+            <DragPreviewImage
+              connect={numberLinePreview}
+              src={numberLinePreviewUrl}
+            />
+            <img src={numberLinePreviewUrl} alt="" />
+          </StyledNumberLinePreviewDiv>
+        )}
       </StyledImageWrapper>
     </ToolModal>
   );
