@@ -1,7 +1,9 @@
+import Konva from "konva";
+
 export type WidgetElementProps = {
   id?: string;
   isPreview?: boolean;
-  canvas: fabric.Canvas | null;
+  canvas: Konva.Stage | null;
   initialX?: number;
   initialY?: number;
   initialAngle?: number;

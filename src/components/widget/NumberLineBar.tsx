@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fabric } from "fabric";
+import Konva from "konva";
 import { useDrag, DragPreviewImage } from "react-dnd";
 import styled from "styled-components";
 import { WidgetDraggableProps, WidgetElementProps } from "../../types/widget";
@@ -36,7 +36,7 @@ const NumberLineBar: React.FC<NumberLineBarProps> = ({
   numerator = defaultNumerator,
   dominator = defaultDominator,
 }) => {
-  const [lineGroup, setLineGroup] = useState<fabric.Group | null>(null);
+  const [lineGroup, setLineGroup] = useState<Konva.Layer | null>(null);
   const [imgRef, setImgRef] = useState<HTMLImageElement | null>(null);
   const [imgSrc, setImgSrc] = useState("");
 
@@ -62,7 +62,7 @@ const NumberLineBar: React.FC<NumberLineBarProps> = ({
     const numberBarGapWidth = 4;
     const numberStartY = 0;
 
-    const numberBarObjects: fabric.Object[] = [];
+    const numberBarObjects = new Konva.Group();
     const numberBarTotalGapCount = (intervalEnd - intervalStart) * dominator;
     const numberBarWidth = numberLineWidth / numberBarTotalGapCount;
     let counter = 0;
@@ -71,25 +71,35 @@ const NumberLineBar: React.FC<NumberLineBarProps> = ({
       currentX < numberLineStartX + numberLineWidth;
       currentX += numberBarWidth
     ) {
-      const rect = new fabric.Rect({
+      const rect = new Konva.Rect({
         fill: numerator <= counter ? widgetColor : widgetActiveColor,
         width: numberBarWidth - numberBarGapWidth,
         height: numberBarHeight,
-        left: currentX + numberBarGapWidth / 2,
-        top: numberStartY,
+        x: currentX + numberBarGapWidth / 2,
+        y: numberStartY,
       });
-      numberBarObjects.push(rect);
+      numberBarObjects.add(rect);
       counter += 1;
     }
 
-    const lineGroup = new fabric.Group(numberBarObjects, {
+    const lineGroup = new Konva.Layer({
       name: id,
-      left: initialX || 0,
-      top: initialY || 0,
+      x: initialX || 0,
+      y: initialY || 0,
       angle: initialAngle || 0,
     });
+    lineGroup.add(numberBarObjects);
     setLineGroup(lineGroup);
-  }, [dominator, id, initialAngle, initialX, initialY, intervalEnd, intervalStart, numerator]);
+  }, [
+    dominator,
+    id,
+    initialAngle,
+    initialX,
+    initialY,
+    intervalEnd,
+    intervalStart,
+    numerator,
+  ]);
 
   useEffect(() => {
     if (lineGroup && imgRef) {
@@ -104,8 +114,8 @@ const NumberLineBar: React.FC<NumberLineBarProps> = ({
       canvas.add(lineGroup);
     }
     return () => {
-      if (lineGroup && canvas) {
-        canvas.remove(lineGroup);
+      if (lineGroup) {
+        lineGroup.remove();
       }
     };
   }, [canvas, lineGroup]);

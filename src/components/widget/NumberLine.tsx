@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { fabric } from "fabric";
+import Konva from "konva";
 import { useDrag, DragPreviewImage } from "react-dnd";
 import styled from "styled-components";
 import { WidgetDraggableProps, WidgetElementProps } from "../../types/widget";
+import { KonvaEventObject } from "konva/lib/Node";
 
 const defaultIntervalStart = 0;
 const defaultIntervalEnd = 1;
@@ -30,8 +31,8 @@ const NumberLine: React.FC<NumberLineProps> = ({
   baseDominator = defaultBaseDominator,
 }) => {
   const [numberLineWidth, setNumberLineWidth] = useState(400);
-  const [lineGroup, setLineGroup] = useState<fabric.Group | null>(null);
-  const [arrowObject, setArrowObject] = useState<fabric.Group | null>(null);
+  const [lineLayer, setLineLayer] = useState<Konva.Layer | null>(null);
+  const [arrowObject, setArrowObject] = useState<Konva.Group | null>(null);
   const [imgRef, setImgRef] = useState<HTMLImageElement | null>(null);
   const [imgSrc, setImgSrc] = useState("");
 
@@ -55,7 +56,7 @@ const NumberLine: React.FC<NumberLineProps> = ({
     const fontSize = 28;
     const fontFamily = "san-serif";
 
-    const numberLineStartX = 0;
+    const numberLineStartX = 10;
     const numberLineStartY = 0;
     const numberLineHeight = 36;
     const numberLineGapHeight = 20;
@@ -67,28 +68,31 @@ const NumberLine: React.FC<NumberLineProps> = ({
     const numberLineGapWidth = numberLineWidth / numberLineTotalGapCount;
     const numberLineHeightGap = (numberLineHeight - numberLineGapHeight) / 2;
 
-    const lineGroupObjects: fabric.Object[] = [];
-    const baseLine = new fabric.Line(
-      [0, 0, numberLineWidth + arrowWidth + arrowLength, 0],
-      {
-        stroke: lineStrokeColor,
-        strokeWidth: lineStrokeWidth,
-        strokeLineCap: lineStrokeLinCap,
-        left: numberLineStartX,
-        top: numberLineStartY + numberLineHeight / 2,
-      }
-    );
-    lineGroupObjects.push(baseLine);
+    const lineLayerObjects = new Konva.Group();
+    const baseLine = new Konva.Line({
+      points: [
+        0,
+        numberLineStartY + numberLineHeight / 2,
+        numberLineWidth + arrowWidth + arrowLength,
+        numberLineStartY + numberLineHeight / 2,
+      ],
+      stroke: lineStrokeColor,
+      strokeWidth: lineStrokeWidth,
+      strokeLineCap: lineStrokeLinCap,
+      x: numberLineStartX,
+      y: numberLineStartY,
+    });
+    lineLayerObjects.add(baseLine);
 
     let counter = 0;
     for (
-      let currentX = numberLineStartX;
-      currentX <= numberLineStartX + numberLineWidth + numberLineGapWidth / 2;
+      let currentX = 0;
+      currentX <= numberLineWidth + numberLineGapWidth / 2;
       currentX += numberLineGapWidth
     ) {
       const isCurrentInteger = counter % baseDominator === 0;
-      const line = new fabric.Line(
-        [
+      const line = new Konva.Line({
+        points: [
           currentX,
           isCurrentInteger ? 0 : numberLineHeightGap,
           currentX,
@@ -96,40 +100,39 @@ const NumberLine: React.FC<NumberLineProps> = ({
             ? numberLineHeight
             : numberLineHeight - numberLineHeightGap,
         ],
-        {
-          stroke: lineStrokeColor,
-          strokeWidth: lineStrokeWidth,
-          strokeLineCap: lineStrokeLinCap,
-          left: currentX,
-          top: isCurrentInteger
-            ? numberLineStartY
-            : numberLineStartY + numberLineHeightGap,
-        }
-      );
-      lineGroupObjects.push(line);
+        stroke: lineStrokeColor,
+        strokeWidth: lineStrokeWidth,
+        strokeLineCap: lineStrokeLinCap,
+        x: numberLineStartX,
+        y: numberLineStartY,
+      });
+      lineLayerObjects.add(line);
       counter += 1;
     }
 
-    const arrowUpper = new fabric.Line([0, 0, arrowLength, arrowLength], {
-      stroke: lineStrokeColor,
-      strokeWidth: arrowStrokeWidth,
-      strokeLineCap: lineStrokeLinCap,
-      left: numberLineStartX + numberLineWidth + arrowWidth,
-      top: numberLineStartY + numberLineHeight / 2 - arrowLength,
-    });
-    const arrowLower = new fabric.Line([0, arrowLength, arrowLength, 0], {
-      stroke: lineStrokeColor,
-      strokeWidth: arrowStrokeWidth,
-      strokeLineCap: lineStrokeLinCap,
-      left: numberLineStartX + numberLineWidth + arrowWidth,
-      top: numberLineStartY + numberLineHeight / 2,
-    });
-    const arrowObject = new fabric.Group([arrowUpper, arrowLower], {
+    const arrowObject = new Konva.Group({
       perPixelTargetFind: true,
       hoverCursor: "pointer",
     });
+    const arrowUpper = new Konva.Line({
+      points: [0, 0, arrowLength, arrowLength],
+      stroke: lineStrokeColor,
+      strokeWidth: arrowStrokeWidth,
+      strokeLineCap: lineStrokeLinCap,
+      x: numberLineStartX + numberLineWidth + arrowWidth,
+      y: numberLineStartY + numberLineHeight / 2 - arrowLength,
+    });
+    const arrowLower = new Konva.Line({
+      points: [0, arrowLength, arrowLength, 0],
+      stroke: lineStrokeColor,
+      strokeWidth: arrowStrokeWidth,
+      strokeLineCap: lineStrokeLinCap,
+      x: numberLineStartX + numberLineWidth + arrowWidth,
+      y: numberLineStartY + numberLineHeight / 2,
+    });
+    arrowObject.add(...[arrowUpper, arrowLower]);
     setArrowObject(arrowObject);
-    lineGroupObjects.push(arrowObject);
+    lineLayerObjects.add(arrowObject);
 
     counter = 0;
     for (
@@ -137,25 +140,26 @@ const NumberLine: React.FC<NumberLineProps> = ({
       integerCounter <= intervalEnd;
       integerCounter += 1
     ) {
-      const line = new fabric.Text(integerCounter.toString(), {
+      const line = new Konva.Text({
+        text: integerCounter.toString(),
         fontSize,
         fontFamily,
-        left:
-          numberLineStartX + counter * numberLineGapWidth * baseDominator - 8,
-        top: numberLineStartY + numberLineHeight + 6,
+        x: numberLineStartX + counter * numberLineGapWidth * baseDominator - 8,
+        y: numberLineStartY + numberLineHeight + 6,
       });
-      lineGroupObjects.push(line);
+      lineLayerObjects.add(line);
       counter += 1;
     }
 
-    const lineGroup = new fabric.Group(lineGroupObjects, {
-      name: id,
-      left: initialX || 0,
-      top: initialY || 0,
+    const lineLayer = new Konva.Layer({
+      id,
+      x: initialX || 0,
+      y: initialY || 0,
       angle: initialAngle || 0,
       subTargetCheck: true,
     });
-    setLineGroup(lineGroup);
+    lineLayer.add(lineLayerObjects);
+    setLineLayer(lineLayer);
   }, [
     baseDominator,
     id,
@@ -169,19 +173,19 @@ const NumberLine: React.FC<NumberLineProps> = ({
 
   const [isArrowDragging, setIsArrowDragging] = useState(false);
   useEffect(() => {
-    const onArrowMouseOver = (e: fabric.IEvent<Event>) => {
-      const objects: fabric.Line[] = (e.target as any)._objects;
+    const onArrowMouseOver = (e: KonvaEventObject<Event>) => {
+      const objects: Konva.Line[] = (e.target as any)._objects;
       for (const object of objects) {
-        object.set("stroke", "red");
+        object.setAttr("stroke", "red");
       }
-      e.target?.canvas?.requestRenderAll();
+      // e.target?.canvas?.requestRenderAll();
     };
-    const onArrowMouseOut = (e: fabric.IEvent<Event>) => {
-      const objects: fabric.Line[] = (e.target as any)._objects;
+    const onArrowMouseOut = (e: KonvaEventObject<Event>) => {
+      const objects: Konva.Line[] = (e.target as any)._objects;
       for (const object of objects) {
-        object.set("stroke", "black");
+        object.setAttr("stroke", "black");
       }
-      e.target?.canvas?.requestRenderAll();
+      // e.target?.canvas?.requestRenderAll();
     };
     const onArrowMouseDown = () => {
       setIsArrowDragging(true);
@@ -202,46 +206,46 @@ const NumberLine: React.FC<NumberLineProps> = ({
     };
   }, [arrowObject]);
 
+  // useEffect(() => {
+  //   const onArrowMouseMove = (e: KonvaEventObject<Event>) => {
+  //     if (e.target && isArrowDragging) {
+  //       const rightPosX = (e.target.x || 0) + (e.target.width || 0);
+  //       const objectWidthDelta = (e.absolutePointer?.x || 0) - rightPosX;
+  //       setNumberLineWidth(
+  //         (numberLineWidth) => numberLineWidth + objectWidthDelta
+  //       );
+  //     }
+
+  //     if (lineLayer) {
+  //       lineLayer.lockMovementX = isArrowDragging;
+  //       lineLayer.lockMovementY = isArrowDragging;
+  //     }
+  //   };
+
+  //   arrowObject?.on("mousemove", onArrowMouseMove);
+  //   return () => {
+  //     arrowObject?.off("mousemove", onArrowMouseMove);
+  //   };
+  // }, [arrowObject, isArrowDragging, lineLayer]);
+
   useEffect(() => {
-    const onArrowMouseMove = (e: fabric.IEvent<Event>) => {
-      if (e.target && isArrowDragging) {
-        const rightPosX = (e.target.left || 0) + (e.target.width || 0);
-        const objectWidthDelta = (e.absolutePointer?.x || 0) - rightPosX;
-        setNumberLineWidth(
-          (numberLineWidth) => numberLineWidth + objectWidthDelta
-        );
-      }
-
-      if (lineGroup) {
-        lineGroup.lockMovementX = isArrowDragging;
-        lineGroup.lockMovementY = isArrowDragging;
-      }
-    };
-
-    arrowObject?.on("mousemove", onArrowMouseMove);
-    return () => {
-      arrowObject?.off("mousemove", onArrowMouseMove);
-    };
-  }, [arrowObject, isArrowDragging, lineGroup]);
-
-  useEffect(() => {
-    if (lineGroup && imgRef) {
-      const dataUrl = lineGroup.toDataURL({});
+    if (lineLayer && imgRef) {
+      const dataUrl = lineLayer.toDataURL({});
       setImgSrc(dataUrl);
       imgRef.src = dataUrl;
     }
-  }, [imgRef, lineGroup]);
+  }, [imgRef, lineLayer]);
 
   useEffect(() => {
-    if (lineGroup && canvas) {
-      canvas.add(lineGroup);
+    if (lineLayer && canvas) {
+      canvas.add(lineLayer);
     }
     return () => {
-      if (lineGroup && canvas) {
-        canvas.remove(lineGroup);
+      if (lineLayer) {
+        lineLayer.remove();
       }
     };
-  }, [canvas, lineGroup]);
+  }, [canvas, lineLayer]);
 
   if (isPreview) {
     return (

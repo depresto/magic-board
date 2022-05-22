@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDrop } from "react-dnd";
 import { fabric } from "fabric";
+import Konva from "konva";
 import styled from "styled-components";
 import { nanoid } from "nanoid";
 import { WidgetDraggableProps } from "../../types/widget";
@@ -8,17 +9,6 @@ import NumberLine from "../widget/NumberLine";
 import { useToolbox } from "../../context/ToolboxContext";
 import NumberLineBar from "../widget/NumberLineBar";
 import { notEmpty } from "../../helpers";
-
-fabric.Object.prototype.setControlsVisibility({
-  mb: false,
-  ml: false,
-  mr: false,
-  mt: false,
-  bl: false,
-  br: false,
-  tl: false,
-  tr: false,
-});
 
 const magnetAngle = 5;
 const magnetUnitAngle = 45;
@@ -64,6 +54,32 @@ const MainCanvas: React.FC = () => {
     useState<HTMLDivElement | null>(null);
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
+  const [stage, setStage] = useState<Konva.Stage | null>(null);
+
+  useEffect(() => {
+    const containerElement = document.querySelector("#canvas-container");
+    const stage = new Konva.Stage({
+      container: "canvas-container",
+      width: containerElement?.clientWidth,
+      height: containerElement?.clientHeight,
+    });
+    setStage(stage);
+
+    const onWindowResize = () => {
+      if (containerElement) {
+        stage.width(containerElement.clientWidth);
+        stage.height(containerElement.clientHeight);
+      }
+    };
+
+    window.addEventListener("resize", onWindowResize);
+    return () => {
+      window.removeEventListener("resize", onWindowResize);
+      stage.destroy();
+    };
+  }, []);
+  
+
   useEffect(() => {
     let canvas: fabric.Canvas | null = null;
     if (canvasRef) {
@@ -151,8 +167,10 @@ const MainCanvas: React.FC = () => {
         case "Delete":
           if (activeObjects) {
             canvas?.remove(...activeObjects);
-            const widgetIds = activeObjects.map(activeObject => activeObject.name).filter(notEmpty)
-            removeCanvasWidgets?.(widgetIds)
+            const widgetIds = activeObjects
+              .map((activeObject) => activeObject.name)
+              .filter(notEmpty);
+            removeCanvasWidgets?.(widgetIds);
           }
           break;
         default:
@@ -184,12 +202,15 @@ const MainCanvas: React.FC = () => {
     return () => {
       window.removeEventListener("resize", onWindowResize);
     };
-  });
+  }, [canvas, canvasWrapperRef]);
 
   return (
     <StyledCanvasWrapper ref={dropRef} {...collected}>
-      <div className="wrapper" ref={setCanvasWrapperRef}>
+      <div id="canvas-container" className="wrapper"></div>
+
+      {/* <div className="wrapper" ref={setCanvasWrapperRef}>
         <canvas ref={setCanvasRef}></canvas>
+
         {canvasWidgets.map((canvasWidget) => {
           switch (canvasWidget.type) {
             case "number-line":
@@ -220,7 +241,7 @@ const MainCanvas: React.FC = () => {
               return null;
           }
         })}
-      </div>
+      </div> */}
     </StyledCanvasWrapper>
   );
 };
