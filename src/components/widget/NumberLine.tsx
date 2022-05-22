@@ -134,7 +134,7 @@ class NumberLine extends WidgetElement {
       counter += 1;
     }
 
-    this.widgetLayer.add(lineLayerObjects);
+    this.widgetGroup.add(lineLayerObjects);
   }
 }
 // const NumberLine: React.FC<NumberLineProps> = ({

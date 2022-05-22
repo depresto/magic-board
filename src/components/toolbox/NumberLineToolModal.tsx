@@ -29,6 +29,13 @@ const StyledImageWrapper = styled.div`
   img {
     max-width: 100%;
     height: auto;
+    cursor: pointer;
+  }
+  .number-line-bar {
+    padding: 4px 44px 4px 48px;
+  }
+  .number-line {
+    padding: 4px 20px 4px 40px;
   }
 `;
 const StyledButton = styled.button`
@@ -152,10 +159,10 @@ const NumberLineToolModal: React.FC = () => {
 
       <StyledImageWrapper className="pt-2">
         {numberLinePreviewBarImgSrc && (
-          <img src={numberLinePreviewBarImgSrc} alt="" />
+          <img className="number-line-bar" src={numberLinePreviewBarImgSrc} alt="" />
         )}
         {numberLinePreviewImgSrc && (
-          <img src={numberLinePreviewImgSrc} alt="" />
+          <img className="number-line" src={numberLinePreviewImgSrc} alt="" />
         )}
       </StyledImageWrapper>
     </ToolModal>

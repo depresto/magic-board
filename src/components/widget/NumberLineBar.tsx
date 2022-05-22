@@ -62,7 +62,7 @@ class NumberLineBar extends WidgetElement {
       counter += 1;
     }
 
-    this.widgetLayer.add(numberBarObjects)
+    this.widgetGroup.add(numberBarObjects)
   }
 }
 // const NumberLineBar: React.FC<NumberLineBarProps> = ({

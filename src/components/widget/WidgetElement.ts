@@ -15,6 +15,7 @@ class WidgetElement {
   initialAngle?: number;
 
   widgetLayer: Konva.Layer;
+  widgetGroup: Konva.Group;
 
   alpha = 1;
   dragging = false;
@@ -24,7 +25,16 @@ class WidgetElement {
     this.id = option.id;
     this.isPreview = option.isPreview;
     this.initialAngle = option.initialAngle;
-    this.widgetLayer = new Konva.Layer({ draggable: true });
+    this.widgetLayer = new Konva.Layer();
+    this.widgetGroup = new Konva.Group({ draggable: true });
+    this.widgetLayer.add(this.widgetGroup);
+
+    this.widgetGroup.on("mouseover", function () {
+      document.body.style.cursor = "pointer";
+    });
+    this.widgetGroup.on("mouseout", function () {
+      document.body.style.cursor = "default";
+    });
 
     if (option.initialX && option.initialY) {
       this.widgetLayer.setPosition({

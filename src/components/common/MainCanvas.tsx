@@ -9,6 +9,7 @@ import NumberLine from "../widget/NumberLine";
 import { useToolbox } from "../../context/ToolboxContext";
 import NumberLineBar from "../widget/NumberLineBar";
 import { notEmpty } from "../../helpers";
+import WidgetElement from "../widget/WidgetElement";
 
 const magnetAngle = 5;
 const magnetUnitAngle = 45;
@@ -78,7 +79,26 @@ const MainCanvas: React.FC = () => {
       stage.destroy();
     };
   }, []);
-  
+
+  useEffect(() => {
+    if (stage) {
+      for (const canvasWidget of canvasWidgets) {
+        let widget: WidgetElement | null = null;
+        switch (canvasWidget.type) {
+          case "number-line":
+            widget = new NumberLine({ ...canvasWidget });
+            break;
+          case "number-line-bar":
+            widget = new NumberLineBar({ ...canvasWidget });
+            break;
+        }
+
+        if (widget) {
+          stage.add(widget.widgetLayer);
+        }
+      }
+    }
+  }, [canvasWidgets, stage]);
 
   useEffect(() => {
     let canvas: fabric.Canvas | null = null;
