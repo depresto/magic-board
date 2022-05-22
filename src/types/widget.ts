@@ -3,7 +3,6 @@ import Konva from "konva";
 export type WidgetElementProps = {
   id?: string;
   isPreview?: boolean;
-  canvas: Konva.Stage | null;
   initialX?: number;
   initialY?: number;
   initialAngle?: number;
