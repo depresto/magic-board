@@ -42,6 +42,12 @@ const MenuButton: React.FC = () => {
   );
 };
 
+const toolbarNameMapping = {
+  "number-line-tool": "數線工具",
+  "square-tool": "方形元件",
+  "circle-tool": "圓形元件",
+};
+
 const Toolbar: React.FC = () => {
   const { toolboxes, showToolbox, minimizeToolbox } = useToolbox();
 
@@ -62,26 +68,26 @@ const Toolbar: React.FC = () => {
         <MenuButton />
       </div>
 
-      <div>
+      <div className="d-flex">
         {Object.keys(toolboxes).map((toolboxType, index) => {
           const type = toolboxType as ToolboxType;
           const toolboxProps = toolboxes[toolboxType];
+          const toolboxName = toolbarNameMapping[type];
 
-          switch (type) {
-            case "number-line-tool":
-              return (
-                <StyledMenuButton
-                  key={index}
-                  className="py-2 px-4 mr-4"
-                  $type="toolbox"
-                  $active={!toolboxProps.minimize}
-                  onClick={() => onSwitchToolbox(type, toolboxProps)}
-                >
-                  <span className="text-tag">數線工具</span>
-                </StyledMenuButton>
-              );
-            default:
-              return null;
+          if (toolboxName) {
+            return (
+              <StyledMenuButton
+                key={index}
+                className="py-2 px-4 mr-4"
+                $type="toolbox"
+                $active={!toolboxProps.minimize}
+                onClick={() => onSwitchToolbox(type, toolboxProps)}
+              >
+                <span className="text-tag">{toolboxName}</span>
+              </StyledMenuButton>
+            );
+          } else {
+            return null;
           }
         })}
       </div>

@@ -21,14 +21,7 @@ const defaultBaseDominator = 4;
 const defaultNumerator = 1;
 const defaultDominator = 2;
 
-const StyledNumberLineBarImageWrapper = styled.div`
-  padding: 4px 44px 4px 48px;
-`;
-const StyledNumberLineImageWrapper = styled.div`
-  padding: 4px 20px 4px 40px;
-`;
-
-const NumberLineToolModal: React.FC = () => {
+const SquareToolModal: React.FC = () => {
   const [intervalStart, setIntervalStart] = useState<number | undefined>();
   const [intervalEnd, setIntervalEnd] = useState<number | undefined>();
 
@@ -103,7 +96,7 @@ const NumberLineToolModal: React.FC = () => {
   }, [baseDominator, dominator, intervalEnd, intervalStart, numerator]);
 
   return (
-    <ToolModal title="數線工具" type="number-line-tool">
+    <ToolModal title="方形工具" type="square-tool">
       <StyledToolContentDiv>
         <div className="d-flex justify-content-between align-items-center">
           <div>
@@ -168,10 +161,7 @@ const NumberLineToolModal: React.FC = () => {
 
       <StyledModalPreviewImageWrapper className="pt-2">
         {numberLinePreviewBarImgSrc && (
-          <StyledNumberLineBarImageWrapper
-            ref={dragNumberLineBarImgRef}
-            {...imgNumberLineBarCollected}
-          >
+          <div ref={dragNumberLineBarImgRef} {...imgNumberLineBarCollected}>
             <DragPreviewImage
               connect={previewNumberLineBar}
               src={numberLinePreviewBarImgSrc}
@@ -181,23 +171,20 @@ const NumberLineToolModal: React.FC = () => {
               src={numberLinePreviewBarImgSrc}
               alt=""
             />
-          </StyledNumberLineBarImageWrapper>
+          </div>
         )}
         {numberLinePreviewImgSrc && (
-          <StyledNumberLineImageWrapper
-            ref={dragNumberLineImgRef}
-            {...imgNumberLineCollected}
-          >
+          <div ref={dragNumberLineImgRef} {...imgNumberLineCollected}>
             <DragPreviewImage
               connect={previewNumberLine}
               src={numberLinePreviewImgSrc}
             />
             <img className="number-line" src={numberLinePreviewImgSrc} alt="" />
-          </StyledNumberLineImageWrapper>
+          </div>
         )}
       </StyledModalPreviewImageWrapper>
     </ToolModal>
   );
 };
 
-export default NumberLineToolModal;
+export default SquareToolModal;
