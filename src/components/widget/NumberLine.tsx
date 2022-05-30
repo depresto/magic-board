@@ -1,19 +1,20 @@
-import * as PIXI from "pixi.js";
-import WidgetElement, { WidgetElementProps } from "./WidgetElement";
-import { LINE_CAP } from "pixi.js";
+import Konva from "konva";
+import { WidgetElementProps } from "../../types/widget";
+import WidgetElement from "./WidgetElement";
 
 const defaultIntervalStart = 0;
 const defaultIntervalEnd = 1;
 const defaultBaseDominator = 4;
 
-const lineStrokeColor = 0x000000;
+const lineStrokeColor = "black";
 const lineStrokeLinCap = "round";
 const lineStrokeWidth = 2;
 const arrowStrokeWidth = 3;
 const fontSize = 28;
 const fontFamily = "san-serif";
 
-const numberLineStartX = 0;
+const numberLineWidth = 400;
+const numberLineStartX = 10;
 const numberLineStartY = 0;
 const numberLineHeight = 36;
 const numberLineGapHeight = 20;
@@ -25,123 +26,109 @@ type NumberLineProps = WidgetElementProps & {
   intervalEnd?: number;
   baseDominator?: number;
 };
-
 class NumberLine extends WidgetElement {
-  intervalStart: number;
-  intervalEnd: number;
-  baseDominator: number;
-  numberLineWidth = 400;
+  arrowObject: Konva.Group;
 
-  constructor(options: NumberLineProps) {
+  constructor({
+    intervalStart = defaultIntervalStart,
+    intervalEnd = defaultIntervalEnd,
+    baseDominator = defaultBaseDominator,
+    ...options
+  }: NumberLineProps) {
     super(options);
-    this.intervalStart = options.intervalStart ?? defaultIntervalStart;
-    this.intervalEnd = options.intervalStart ?? defaultIntervalEnd;
-    this.baseDominator = options.baseDominator ?? defaultBaseDominator;
 
     const numberLineTotalGapCount =
-      (this.intervalEnd - this.intervalStart) * this.baseDominator;
-    const numberLineGapWidth = this.numberLineWidth / numberLineTotalGapCount;
+      (intervalEnd - intervalStart) * baseDominator;
+    const numberLineGapWidth = numberLineWidth / numberLineTotalGapCount;
     const numberLineHeightGap = (numberLineHeight - numberLineGapHeight) / 2;
 
-    // Base line
-    const baseLine = new PIXI.Graphics();
-    baseLine.position.set(
-      numberLineStartX,
-      numberLineStartY + numberLineHeight / 2
-    );
-    baseLine.lineStyle({
-      color: lineStrokeColor,
-      width: lineStrokeWidth,
-      cap: lineStrokeLinCap as LINE_CAP,
+    const lineLayerObjects = new Konva.Group();
+    const baseLine = new Konva.Line({
+      points: [
+        0,
+        numberLineStartY + numberLineHeight / 2,
+        numberLineWidth + arrowWidth + arrowLength,
+        numberLineStartY + numberLineHeight / 2,
+      ],
+      stroke: lineStrokeColor,
+      strokeWidth: lineStrokeWidth,
+      strokeLineCap: lineStrokeLinCap,
+      x: numberLineStartX,
+      y: numberLineStartY,
     });
-    baseLine.moveTo(0, 0);
-    baseLine.lineTo(this.numberLineWidth + arrowWidth + arrowLength, 0);
-    this.addChild(baseLine);
+    lineLayerObjects.add(baseLine);
 
     // Line
     let counter = 0;
     for (
-      let currentX = numberLineStartX;
-      currentX <=
-      numberLineStartX + this.numberLineWidth + numberLineGapWidth / 2;
+      let currentX = 0;
+      currentX <= numberLineWidth + numberLineGapWidth / 2;
       currentX += numberLineGapWidth
     ) {
-      const isCurrentInteger = counter % this.baseDominator === 0;
-
-      const line = new PIXI.Graphics();
-      line.lineStyle({
-        color: lineStrokeColor,
-        width: lineStrokeWidth,
-        cap: lineStrokeLinCap as LINE_CAP,
+      const isCurrentInteger = counter % baseDominator === 0;
+      const line = new Konva.Line({
+        points: [
+          currentX,
+          isCurrentInteger ? 0 : numberLineHeightGap,
+          currentX,
+          isCurrentInteger
+            ? numberLineHeight
+            : numberLineHeight - numberLineHeightGap,
+        ],
+        stroke: lineStrokeColor,
+        strokeWidth: lineStrokeWidth,
+        strokeLineCap: lineStrokeLinCap,
+        x: numberLineStartX,
+        y: numberLineStartY,
       });
-      line.moveTo(currentX, isCurrentInteger ? 0 : numberLineHeightGap);
-      line.lineTo(
-        currentX,
-        isCurrentInteger
-          ? numberLineHeight
-          : numberLineHeight - numberLineHeightGap
-      );
-      this.addChild(line);
+      lineLayerObjects.add(line);
       counter += 1;
     }
 
-    // Arrow
-    const arrowUpper = new PIXI.Graphics();
-    arrowUpper.position.set(
-      numberLineStartX + this.numberLineWidth + arrowWidth,
-      numberLineStartY + numberLineHeight / 2 - arrowLength
-    );
-    arrowUpper.lineStyle({
-      color: lineStrokeColor,
-      width: arrowStrokeWidth,
-      cap: lineStrokeLinCap as LINE_CAP,
+    const arrowObject = new Konva.Group({
+      perPixelTargetFind: true,
+      hoverCursor: "pointer",
     });
-    arrowUpper.moveTo(0, 0);
-    arrowUpper.lineTo(arrowLength, arrowLength);
-
-    const arrowLower = new PIXI.Graphics();
-    arrowLower.position.set(
-      numberLineStartX + this.numberLineWidth + arrowWidth,
-      numberLineStartY + numberLineHeight / 2
-    );
-    arrowLower.lineStyle({
-      color: lineStrokeColor,
-      width: arrowStrokeWidth,
-      cap: lineStrokeLinCap as LINE_CAP,
+    const arrowUpper = new Konva.Line({
+      points: [0, 0, arrowLength, arrowLength],
+      stroke: lineStrokeColor,
+      strokeWidth: arrowStrokeWidth,
+      strokeLineCap: lineStrokeLinCap,
+      x: numberLineStartX + numberLineWidth + arrowWidth,
+      y: numberLineStartY + numberLineHeight / 2 - arrowLength,
     });
-    arrowLower.moveTo(0, arrowLength);
-    arrowLower.lineTo(arrowLength, 0);
-
-    const arrowObject = new PIXI.Container();
-    arrowObject.addChild(arrowUpper);
-    arrowObject.addChild(arrowLower);
-    this.addChild(arrowObject);
+    const arrowLower = new Konva.Line({
+      points: [0, arrowLength, arrowLength, 0],
+      stroke: lineStrokeColor,
+      strokeWidth: arrowStrokeWidth,
+      strokeLineCap: lineStrokeLinCap,
+      x: numberLineStartX + numberLineWidth + arrowWidth,
+      y: numberLineStartY + numberLineHeight / 2,
+    });
+    arrowObject.add(...[arrowUpper, arrowLower]);
+    this.arrowObject = arrowObject;
+    lineLayerObjects.add(arrowObject);
 
     counter = 0;
     for (
-      let integerCounter = this.intervalStart;
-      integerCounter <= this.intervalEnd;
+      let integerCounter = intervalStart;
+      integerCounter <= intervalEnd;
       integerCounter += 1
     ) {
-      const text = new PIXI.Text(integerCounter.toString(), {
+      const line = new Konva.Text({
+        text: integerCounter.toString(),
         fontSize,
         fontFamily,
+        x: numberLineStartX + counter * numberLineGapWidth * baseDominator - 8,
+        y: numberLineStartY + numberLineHeight + 6,
       });
-      text.position.set(
-        numberLineStartX +
-          counter * numberLineGapWidth * this.baseDominator -
-          8,
-        numberLineStartY + numberLineHeight + 6
-      );
-      this.addChild(text);
+      lineLayerObjects.add(line);
       counter += 1;
     }
 
-    const bounds = this.getBounds();
-    this.hitArea = new PIXI.Rectangle(bounds.width, bounds.height);
+    this.widgetGroup.add(lineLayerObjects);
   }
 }
-
 // const NumberLine: React.FC<NumberLineProps> = ({
 //   id,
 //   isPreview,
@@ -154,8 +141,8 @@ class NumberLine extends WidgetElement {
 //   baseDominator = defaultBaseDominator,
 // }) => {
 //   const [numberLineWidth, setNumberLineWidth] = useState(400);
-//   const [lineGroup, setLineGroup] = useState<fabric.Group | null>(null);
-//   const [arrowObject, setArrowObject] = useState<fabric.Group | null>(null);
+//   const [lineLayer, setLineLayer] = useState<Konva.Layer | null>(null);
+//   const [arrowObject, setArrowObject] = useState<Konva.Group | null>(null);
 //   const [imgRef, setImgRef] = useState<HTMLImageElement | null>(null);
 //   const [imgSrc, setImgSrc] = useState("");
 
@@ -172,47 +159,36 @@ class NumberLine extends WidgetElement {
 //   });
 
 //   useEffect(() => {
-//     const lineStrokeColor = "black";
-//     const lineStrokeLinCap = "round";
-//     const lineStrokeWidth = 2;
-//     const arrowStrokeWidth = 3;
-//     const fontSize = 28;
-//     const fontFamily = "san-serif";
-
-//     const numberLineStartX = 0;
-//     const numberLineStartY = 0;
-//     const numberLineHeight = 36;
-//     const numberLineGapHeight = 20;
-//     const arrowWidth = 20;
-//     const arrowLength = 8;
-
 //     const numberLineTotalGapCount =
 //       (intervalEnd - intervalStart) * baseDominator;
 //     const numberLineGapWidth = numberLineWidth / numberLineTotalGapCount;
 //     const numberLineHeightGap = (numberLineHeight - numberLineGapHeight) / 2;
 
-//     const lineGroupObjects: fabric.Object[] = [];
-//     const baseLine = new fabric.Line(
-//       [0, 0, numberLineWidth + arrowWidth + arrowLength, 0],
-//       {
-//         stroke: lineStrokeColor,
-//         strokeWidth: lineStrokeWidth,
-//         strokeLineCap: lineStrokeLinCap,
-//         left: numberLineStartX,
-//         top: numberLineStartY + numberLineHeight / 2,
-//       }
-//     );
-//     lineGroupObjects.push(baseLine);
+//     const lineLayerObjects = new Konva.Group();
+//     const baseLine = new Konva.Line({
+//       points: [
+//         0,
+//         numberLineStartY + numberLineHeight / 2,
+//         numberLineWidth + arrowWidth + arrowLength,
+//         numberLineStartY + numberLineHeight / 2,
+//       ],
+//       stroke: lineStrokeColor,
+//       strokeWidth: lineStrokeWidth,
+//       strokeLineCap: lineStrokeLinCap,
+//       x: numberLineStartX,
+//       y: numberLineStartY,
+//     });
+//     lineLayerObjects.add(baseLine);
 
 //     let counter = 0;
 //     for (
-//       let currentX = numberLineStartX;
-//       currentX <= numberLineStartX + numberLineWidth + numberLineGapWidth / 2;
+//       let currentX = 0;
+//       currentX <= numberLineWidth + numberLineGapWidth / 2;
 //       currentX += numberLineGapWidth
 //     ) {
 //       const isCurrentInteger = counter % baseDominator === 0;
-//       const line = new fabric.Line(
-//         [
+//       const line = new Konva.Line({
+//         points: [
 //           currentX,
 //           isCurrentInteger ? 0 : numberLineHeightGap,
 //           currentX,
@@ -220,40 +196,39 @@ class NumberLine extends WidgetElement {
 //             ? numberLineHeight
 //             : numberLineHeight - numberLineHeightGap,
 //         ],
-//         {
-//           stroke: lineStrokeColor,
-//           strokeWidth: lineStrokeWidth,
-//           strokeLineCap: lineStrokeLinCap,
-//           left: currentX,
-//           top: isCurrentInteger
-//             ? numberLineStartY
-//             : numberLineStartY + numberLineHeightGap,
-//         }
-//       );
-//       lineGroupObjects.push(line);
+//         stroke: lineStrokeColor,
+//         strokeWidth: lineStrokeWidth,
+//         strokeLineCap: lineStrokeLinCap,
+//         x: numberLineStartX,
+//         y: numberLineStartY,
+//       });
+//       lineLayerObjects.add(line);
 //       counter += 1;
 //     }
 
-//     const arrowUpper = new fabric.Line([0, 0, arrowLength, arrowLength], {
-//       stroke: lineStrokeColor,
-//       strokeWidth: arrowStrokeWidth,
-//       strokeLineCap: lineStrokeLinCap,
-//       left: numberLineStartX + numberLineWidth + arrowWidth,
-//       top: numberLineStartY + numberLineHeight / 2 - arrowLength,
-//     });
-//     const arrowLower = new fabric.Line([0, arrowLength, arrowLength, 0], {
-//       stroke: lineStrokeColor,
-//       strokeWidth: arrowStrokeWidth,
-//       strokeLineCap: lineStrokeLinCap,
-//       left: numberLineStartX + numberLineWidth + arrowWidth,
-//       top: numberLineStartY + numberLineHeight / 2,
-//     });
-//     const arrowObject = new fabric.Group([arrowUpper, arrowLower], {
+//     const arrowObject = new Konva.Group({
 //       perPixelTargetFind: true,
 //       hoverCursor: "pointer",
 //     });
+//     const arrowUpper = new Konva.Line({
+//       points: [0, 0, arrowLength, arrowLength],
+//       stroke: lineStrokeColor,
+//       strokeWidth: arrowStrokeWidth,
+//       strokeLineCap: lineStrokeLinCap,
+//       x: numberLineStartX + numberLineWidth + arrowWidth,
+//       y: numberLineStartY + numberLineHeight / 2 - arrowLength,
+//     });
+//     const arrowLower = new Konva.Line({
+//       points: [0, arrowLength, arrowLength, 0],
+//       stroke: lineStrokeColor,
+//       strokeWidth: arrowStrokeWidth,
+//       strokeLineCap: lineStrokeLinCap,
+//       x: numberLineStartX + numberLineWidth + arrowWidth,
+//       y: numberLineStartY + numberLineHeight / 2,
+//     });
+//     arrowObject.add(...[arrowUpper, arrowLower]);
 //     setArrowObject(arrowObject);
-//     lineGroupObjects.push(arrowObject);
+//     lineLayerObjects.add(arrowObject);
 
 //     counter = 0;
 //     for (
@@ -261,25 +236,26 @@ class NumberLine extends WidgetElement {
 //       integerCounter <= intervalEnd;
 //       integerCounter += 1
 //     ) {
-//       const line = new fabric.Text(integerCounter.toString(), {
+//       const line = new Konva.Text({
+//         text: integerCounter.toString(),
 //         fontSize,
 //         fontFamily,
-//         left:
-//           numberLineStartX + counter * numberLineGapWidth * baseDominator - 8,
-//         top: numberLineStartY + numberLineHeight + 6,
+//         x: numberLineStartX + counter * numberLineGapWidth * baseDominator - 8,
+//         y: numberLineStartY + numberLineHeight + 6,
 //       });
-//       lineGroupObjects.push(line);
+//       lineLayerObjects.add(line);
 //       counter += 1;
 //     }
 
-//     const lineGroup = new fabric.Group(lineGroupObjects, {
-//       name: id,
-//       left: initialX || 0,
-//       top: initialY || 0,
+//     const lineLayer = new Konva.Layer({
+//       id,
+//       x: initialX || 0,
+//       y: initialY || 0,
 //       angle: initialAngle || 0,
 //       subTargetCheck: true,
 //     });
-//     setLineGroup(lineGroup);
+//     lineLayer.add(lineLayerObjects);
+//     setLineLayer(lineLayer);
 //   }, [
 //     baseDominator,
 //     id,
@@ -293,19 +269,19 @@ class NumberLine extends WidgetElement {
 
 //   const [isArrowDragging, setIsArrowDragging] = useState(false);
 //   useEffect(() => {
-//     const onArrowMouseOver = (e: fabric.IEvent<Event>) => {
-//       const objects: fabric.Line[] = (e.target as any)._objects;
+//     const onArrowMouseOver = (e: KonvaEventObject<Event>) => {
+//       const objects: Konva.Line[] = (e.target as any)._objects;
 //       for (const object of objects) {
-//         object.set("stroke", "red");
+//         object.setAttr("stroke", "red");
 //       }
-//       e.target?.canvas?.requestRenderAll();
+//       // e.target?.canvas?.requestRenderAll();
 //     };
-//     const onArrowMouseOut = (e: fabric.IEvent<Event>) => {
-//       const objects: fabric.Line[] = (e.target as any)._objects;
+//     const onArrowMouseOut = (e: KonvaEventObject<Event>) => {
+//       const objects: Konva.Line[] = (e.target as any)._objects;
 //       for (const object of objects) {
-//         object.set("stroke", "black");
+//         object.setAttr("stroke", "black");
 //       }
-//       e.target?.canvas?.requestRenderAll();
+//       // e.target?.canvas?.requestRenderAll();
 //     };
 //     const onArrowMouseDown = () => {
 //       setIsArrowDragging(true);
@@ -326,46 +302,46 @@ class NumberLine extends WidgetElement {
 //     };
 //   }, [arrowObject]);
 
+//   // useEffect(() => {
+//   //   const onArrowMouseMove = (e: KonvaEventObject<Event>) => {
+//   //     if (e.target && isArrowDragging) {
+//   //       const rightPosX = (e.target.x || 0) + (e.target.width || 0);
+//   //       const objectWidthDelta = (e.absolutePointer?.x || 0) - rightPosX;
+//   //       setNumberLineWidth(
+//   //         (numberLineWidth) => numberLineWidth + objectWidthDelta
+//   //       );
+//   //     }
+
+//   //     if (lineLayer) {
+//   //       lineLayer.lockMovementX = isArrowDragging;
+//   //       lineLayer.lockMovementY = isArrowDragging;
+//   //     }
+//   //   };
+
+//   //   arrowObject?.on("mousemove", onArrowMouseMove);
+//   //   return () => {
+//   //     arrowObject?.off("mousemove", onArrowMouseMove);
+//   //   };
+//   // }, [arrowObject, isArrowDragging, lineLayer]);
+
 //   useEffect(() => {
-//     const onArrowMouseMove = (e: fabric.IEvent<Event>) => {
-//       if (e.target && isArrowDragging) {
-//         const rightPosX = (e.target.left || 0) + (e.target.width || 0);
-//         const objectWidthDelta = (e.absolutePointer?.x || 0) - rightPosX;
-//         setNumberLineWidth(
-//           (numberLineWidth) => numberLineWidth + objectWidthDelta
-//         );
-//       }
-
-//       if (lineGroup) {
-//         lineGroup.lockMovementX = isArrowDragging;
-//         lineGroup.lockMovementY = isArrowDragging;
-//       }
-//     };
-
-//     arrowObject?.on("mousemove", onArrowMouseMove);
-//     return () => {
-//       arrowObject?.off("mousemove", onArrowMouseMove);
-//     };
-//   }, [arrowObject, isArrowDragging, lineGroup]);
-
-//   useEffect(() => {
-//     if (lineGroup && imgRef) {
-//       const dataUrl = lineGroup.toDataURL({});
+//     if (lineLayer && imgRef) {
+//       const dataUrl = lineLayer.toDataURL({});
 //       setImgSrc(dataUrl);
 //       imgRef.src = dataUrl;
 //     }
-//   }, [imgRef, lineGroup]);
+//   }, [imgRef, lineLayer]);
 
 //   useEffect(() => {
-//     if (lineGroup && canvas) {
-//       canvas.add(lineGroup);
+//     if (lineLayer && canvas) {
+//       canvas.add(lineLayer);
 //     }
 //     return () => {
-//       if (lineGroup && canvas) {
-//         canvas.remove(lineGroup);
+//       if (lineLayer) {
+//         lineLayer.remove();
 //       }
 //     };
-//   }, [canvas, lineGroup]);
+//   }, [canvas, lineLayer]);
 
 //   if (isPreview) {
 //     return (

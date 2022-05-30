@@ -1,27 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useDrop } from "react-dnd";
 import { fabric } from "fabric";
+import Konva from "konva";
 import styled from "styled-components";
 import { nanoid } from "nanoid";
-import * as PIXI from "pixi.js";
-import { Transformer } from "@pixi-essentials/transformer";
 import { WidgetDraggableProps } from "../../types/widget";
 import NumberLine from "../widget/NumberLine";
 import { useToolbox } from "../../context/ToolboxContext";
 import NumberLineBar from "../widget/NumberLineBar";
 import { notEmpty } from "../../helpers";
 import WidgetElement from "../widget/WidgetElement";
-
-fabric.Object.prototype.setControlsVisibility({
-  mb: false,
-  ml: false,
-  mr: false,
-  mt: false,
-  bl: false,
-  br: false,
-  tl: false,
-  tr: false,
-});
 
 const magnetAngle = 5;
 const magnetUnitAngle = 45;
@@ -59,53 +47,57 @@ const MainCanvas: React.FC = () => {
     },
   });
 
-  const [canvasWrapperRef, setCanvasWrapperRef] =
-    useState<HTMLDivElement | null>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
-  const [pixiApp, setPixiApp] = useState<PIXI.Application | null>(null);
-  useEffect(() => {
-    let app: PIXI.Application | null = null;
-    if (canvasWrapperRef) {
-      app = new PIXI.Application({ backgroundAlpha: 0 });
-      app.resizeTo = canvasWrapperRef;
-      canvasWrapperRef.appendChild(app.view);
-      app.stage.addChild(new Transformer());
-      setPixiApp(app);
-    }
+  const [stage, setStage] = useState<Konva.Stage | null>(null);
 
-    return () => {
-      if (app) {
-        app.destroy(true, true);
+  useEffect(() => {
+    const containerElement = document.querySelector("#canvas-container");
+    const stage = new Konva.Stage({
+      container: "canvas-container",
+      width: containerElement?.clientWidth,
+      height: containerElement?.clientHeight,
+    });
+    setStage(stage);
+
+    const onWindowResize = () => {
+      if (containerElement) {
+        stage.width(containerElement.clientWidth);
+        stage.height(containerElement.clientHeight);
       }
     };
-  }, [canvasWrapperRef]);
+
+    window.addEventListener("resize", onWindowResize);
+    return () => {
+      window.removeEventListener("resize", onWindowResize);
+      stage.destroy();
+    };
+  }, []);
 
   useEffect(() => {
-    if (pixiApp?.stage && canvasWidgets.length > 0) {
+    if (stage) {
       for (const canvasWidget of canvasWidgets) {
-        let Widget: typeof WidgetElement | null = null;
+        let widget: WidgetElement | null = null;
+        const positionProps = {
+          initialX: canvasWidget.x,
+          initialY: canvasWidget.y,
+          initialAngle: canvasWidget.angle,
+        };
+
         switch (canvasWidget.type) {
           case "number-line":
-            Widget = NumberLine;
+            widget = new NumberLine({ ...canvasWidget, ...positionProps });
             break;
           case "number-line-bar":
-            Widget = NumberLineBar;
+            widget = new NumberLineBar({ ...canvasWidget, ...positionProps });
             break;
         }
 
-        if (!Widget) {
-          continue;
+        if (widget) {
+          stage.add(widget.widgetLayer);
         }
-        const widget = new Widget({
-          id: canvasWidget.id,
-          initialX: canvasWidget.x,
-          initialY: canvasWidget.y,
-          ...canvasWidget.props,
-        });
-        pixiApp.stage.addChild(widget);
       }
     }
-  }, [canvasWidgets, pixiApp]);
+  }, [canvasWidgets, stage]);
 
   useEffect(() => {
     let isObjectMoving = false;
@@ -197,8 +189,13 @@ const MainCanvas: React.FC = () => {
   });
 
   return (
-    <StyledCanvasWrapper ref={dropRef} {...collected}>
-      <div className="wrapper" ref={setCanvasWrapperRef}></div>
+    <StyledCanvasWrapper>
+      <div
+        id="canvas-container"
+        className="wrapper"
+        ref={dropRef}
+        {...collected}
+      ></div>
     </StyledCanvasWrapper>
   );
 };

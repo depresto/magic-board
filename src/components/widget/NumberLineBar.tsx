@@ -1,6 +1,7 @@
-import * as PIXI from "pixi.js";
-import { widgetColorHex } from ".";
-import WidgetElement, { WidgetElementProps } from "./WidgetElement";
+import Konva from "konva";
+import { WidgetElementProps } from "../../types/widget";
+import { widgetActiveColor, widgetColor } from ".";
+import WidgetElement from "./WidgetElement";
 
 const defaultIntervalStart = 0;
 const defaultIntervalEnd = 1;
@@ -22,24 +23,19 @@ type NumberLineBarProps = WidgetElementProps & {
   numerator?: number;
   dominator?: number;
 };
-
 class NumberLineBar extends WidgetElement {
-  intervalStart: number;
-  intervalEnd: number;
-  baseDominator: number;
-  numerator: number;
-  dominator: number;
-
-  constructor(options: NumberLineBarProps) {
+  constructor({
+    intervalStart = defaultIntervalStart,
+    intervalEnd = defaultIntervalEnd,
+    baseDominator = defaultBaseDominator,
+    numerator = defaultNumerator,
+    dominator = defaultDominator,
+    ...options
+  }: NumberLineBarProps) {
     super(options);
-    this.intervalStart = options.intervalStart ?? defaultIntervalStart;
-    this.intervalEnd = options.intervalStart ?? defaultIntervalEnd;
-    this.baseDominator = options.baseDominator ?? defaultBaseDominator;
-    this.numerator = options.numerator ?? defaultNumerator;
-    this.dominator = options.dominator ?? defaultDominator;
 
-    const numberBarTotalGapCount =
-      (this.intervalEnd - this.intervalStart) * this.dominator;
+    const numberBarObjects = new Konva.Group();
+    const numberBarTotalGapCount = (intervalEnd - intervalStart) * dominator;
     const numberBarWidth = numberLineWidth / numberBarTotalGapCount;
 
     let counter = 0;
@@ -48,18 +44,18 @@ class NumberLineBar extends WidgetElement {
       currentX < numberLineStartX + numberLineWidth;
       currentX += numberBarWidth
     ) {
-      const rect = new PIXI.Graphics();
-      rect.beginFill(widgetColorHex);
-      rect.alpha = this.numerator <= counter ? 0.8 : 0.2;
-      rect.drawRect(
-        currentX + numberBarGapWidth / 2,
-        numberStartY,
-        numberBarWidth - numberBarGapWidth,
-        numberBarHeight
-      );
-      this.addChild(rect);
+      const rect = new Konva.Rect({
+        fill: numerator <= counter ? widgetColor : widgetActiveColor,
+        width: numberBarWidth - numberBarGapWidth,
+        height: numberBarHeight,
+        x: currentX + numberBarGapWidth / 2,
+        y: numberStartY,
+      });
+      numberBarObjects.add(rect);
       counter += 1;
     }
+
+    this.widgetGroup.add(numberBarObjects)
   }
 }
 

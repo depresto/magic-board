@@ -9,14 +9,11 @@ import NumberLineBar from "../widget/NumberLineBar";
 import { DragPreviewImage, useDrag } from "react-dnd";
 import { WidgetDraggableProps } from "../../types/widget";
 
-const StyledNumberLineBarPreviewDiv = styled.div`
-  cursor: pointer;
-  padding: 0 44px 0 48px;
-`;
-const StyledNumberLinePreviewDiv = styled.div`
-  cursor: pointer;
-  padding: 0 20px 0 40px;
-`;
+const defaultIntervalStart = 0;
+const defaultIntervalEnd = 1;
+const defaultBaseDominator = 4;
+const defaultNumerator = 1;
+const defaultDominator = 2;
 
 const StyledNumberLineToolContentDiv = styled.div`
   background-color: #c4c4c4;
@@ -40,6 +37,13 @@ const StyledImageWrapper = styled.div`
   img {
     max-width: 100%;
     height: auto;
+    cursor: pointer;
+  }
+  .number-line-bar {
+    padding: 4px 44px 4px 48px;
+  }
+  .number-line {
+    padding: 4px 20px 4px 40px;
   }
 `;
 const StyledButton = styled.button`
@@ -62,6 +66,44 @@ const NumberLineToolModal: React.FC = () => {
   const [numerator, setNumerator] = useState<number | undefined>();
   const [dominator, setDominator] = useState<number | undefined>();
 
+  const [imgNumberLineCollected, dragNumberLineImgRef, previewNumberLine] =
+    useDrag<WidgetDraggableProps>({
+      type: "widget",
+      item: {
+        widgetType: "number-line",
+        widgetProps: {
+          intervalStart: intervalStart ?? defaultIntervalStart,
+          intervalEnd: intervalEnd ?? defaultIntervalEnd,
+          baseDominator: baseDominator ?? defaultBaseDominator,
+        },
+      },
+    });
+
+  const [
+    imgNumberLineBarCollected,
+    dragNumberLineBarImgRef,
+    previewNumberLineBar,
+  ] = useDrag<WidgetDraggableProps>({
+    type: "widget",
+    item: {
+      widgetType: "number-line-bar",
+      widgetProps: {
+        intervalStart: intervalStart ?? defaultIntervalStart,
+        intervalEnd: intervalEnd ?? defaultIntervalEnd,
+        baseDominator: baseDominator ?? defaultBaseDominator,
+        numerator: numerator ?? defaultNumerator,
+        dominator: dominator ?? defaultDominator,
+      },
+    },
+  });
+
+  const [numberLinePreviewImgSrc, setNumberLinePreviewImgSrc] = useState<
+    string | null
+  >(null);
+  const [numberLinePreviewBarImgSrc, setNumberLinePreviewBarImgSrc] = useState<
+    string | null
+  >(null);
+
   const onReset = () => {
     setIntervalStart(undefined);
     setIntervalEnd(undefined);
@@ -70,9 +112,15 @@ const NumberLineToolModal: React.FC = () => {
     setDominator(undefined);
   };
 
-  const [numberLineBarPreviewUrl, setNumberLineBarPreviewUrl] = useState<
-    string | null
-  >(null);
+  useEffect(() => {
+    const numberLine = new NumberLine({
+      intervalStart,
+      intervalEnd,
+      baseDominator,
+    });
+    setNumberLinePreviewImgSrc(numberLine.toImageUrl());
+  }, [baseDominator, intervalEnd, intervalStart]);
+
   useEffect(() => {
     const numberLineBar = new NumberLineBar({
       intervalStart,
@@ -81,51 +129,8 @@ const NumberLineToolModal: React.FC = () => {
       numerator,
       dominator,
     });
-    setNumberLineBarPreviewUrl(numberLineBar.toImageUrl());
+    setNumberLinePreviewBarImgSrc(numberLineBar.toImageUrl());
   }, [baseDominator, dominator, intervalEnd, intervalStart, numerator]);
-
-  const [numberLinePreviewUrl, setNumberLinePreviewUrl] = useState<
-    string | null
-  >(null);
-  useEffect(() => {
-    const numberLine = new NumberLine({
-      intervalStart,
-      intervalEnd,
-      baseDominator,
-    });
-    setNumberLinePreviewUrl(numberLine.toImageUrl());
-  }, [baseDominator, intervalEnd, intervalStart]);
-
-  const [
-    numberLineBarImgCollected,
-    numberLineBarDragImgRef,
-    numberLineBarPreview,
-  ] = useDrag<WidgetDraggableProps>({
-    type: "widget",
-    item: {
-      widgetType: "number-line-bar",
-      widgetProps: {
-        intervalStart,
-        intervalEnd,
-        baseDominator,
-        numerator,
-        dominator,
-      },
-    },
-  });
-
-  const [numberLineImgCollected, numberLineDragImgRef, numberLinePreview] =
-    useDrag<WidgetDraggableProps>({
-      type: "widget",
-      item: {
-        widgetType: "number-line",
-        widgetProps: {
-          intervalStart,
-          intervalEnd,
-          baseDominator,
-        },
-      },
-    });
 
   return (
     <ToolModal title="數線工具" type="number-line-tool">
@@ -192,30 +197,27 @@ const NumberLineToolModal: React.FC = () => {
       </StyledNumberLineToolContentDiv>
 
       <StyledImageWrapper className="pt-2">
-        {numberLineBarPreviewUrl && (
-          <StyledNumberLineBarPreviewDiv
-            ref={numberLineBarDragImgRef}
-            {...numberLineBarImgCollected}
-          >
+        {numberLinePreviewBarImgSrc && (
+          <div ref={dragNumberLineBarImgRef} {...imgNumberLineBarCollected}>
             <DragPreviewImage
-              connect={numberLineBarPreview}
-              src={numberLineBarPreviewUrl}
+              connect={previewNumberLineBar}
+              src={numberLinePreviewBarImgSrc}
             />
-            <img src={numberLineBarPreviewUrl} alt="" />
-          </StyledNumberLineBarPreviewDiv>
+            <img
+              className="number-line-bar"
+              src={numberLinePreviewBarImgSrc}
+              alt=""
+            />
+          </div>
         )}
-
-        {numberLinePreviewUrl && (
-          <StyledNumberLinePreviewDiv
-            ref={numberLineDragImgRef}
-            {...numberLineImgCollected}
-          >
+        {numberLinePreviewImgSrc && (
+          <div ref={dragNumberLineImgRef} {...imgNumberLineCollected}>
             <DragPreviewImage
-              connect={numberLinePreview}
-              src={numberLinePreviewUrl}
+              connect={previewNumberLine}
+              src={numberLinePreviewImgSrc}
             />
-            <img src={numberLinePreviewUrl} alt="" />
-          </StyledNumberLinePreviewDiv>
+            <img className="number-line" src={numberLinePreviewImgSrc} alt="" />
+          </div>
         )}
       </StyledImageWrapper>
     </ToolModal>
