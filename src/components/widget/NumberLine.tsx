@@ -1,9 +1,5 @@
-import React, { useEffect, useState } from "react";
 import Konva from "konva";
-import { useDrag, DragPreviewImage } from "react-dnd";
-import styled from "styled-components";
-import { WidgetDraggableProps, WidgetElementProps } from "../../types/widget";
-import { KonvaEventObject } from "konva/lib/Node";
+import { WidgetElementProps } from "../../types/widget";
 import WidgetElement from "./WidgetElement";
 
 const defaultIntervalStart = 0;
@@ -24,11 +20,6 @@ const numberLineHeight = 36;
 const numberLineGapHeight = 20;
 const arrowWidth = 20;
 const arrowLength = 8;
-
-const StyledPreviewDiv = styled.div`
-  cursor: pointer;
-  padding: 0 20px 0 40px;
-`;
 
 type NumberLineProps = WidgetElementProps & {
   intervalStart?: number;

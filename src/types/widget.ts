@@ -1,5 +1,3 @@
-import Konva from "konva";
-
 export type WidgetElementProps = {
   id?: string;
   isPreview?: boolean;

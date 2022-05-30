@@ -51,9 +51,6 @@ const MainCanvas: React.FC = () => {
     },
   });
 
-  const [canvasWrapperRef, setCanvasWrapperRef] =
-    useState<HTMLDivElement | null>(null);
-  const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [stage, setStage] = useState<Konva.Stage | null>(null);
 
@@ -84,12 +81,18 @@ const MainCanvas: React.FC = () => {
     if (stage) {
       for (const canvasWidget of canvasWidgets) {
         let widget: WidgetElement | null = null;
+        const positionProps = {
+          initialX: canvasWidget.x,
+          initialY: canvasWidget.y,
+          initialAngle: canvasWidget.angle,
+        };
+
         switch (canvasWidget.type) {
           case "number-line":
-            widget = new NumberLine({ ...canvasWidget });
+            widget = new NumberLine({ ...canvasWidget, ...positionProps });
             break;
           case "number-line-bar":
-            widget = new NumberLineBar({ ...canvasWidget });
+            widget = new NumberLineBar({ ...canvasWidget, ...positionProps });
             break;
         }
 
@@ -99,20 +102,6 @@ const MainCanvas: React.FC = () => {
       }
     }
   }, [canvasWidgets, stage]);
-
-  useEffect(() => {
-    let canvas: fabric.Canvas | null = null;
-    if (canvasRef) {
-      canvas = new fabric.Canvas(canvasRef);
-      canvas.targetFindTolerance = 40;
-      canvas.perPixelTargetFind = true;
-      setCanvas(canvas);
-    }
-    return () => {
-      setCanvas(null);
-      canvas?.dispose();
-    };
-  }, [canvasRef]);
 
   useEffect(() => {
     let isObjectMoving = false;
@@ -203,65 +192,14 @@ const MainCanvas: React.FC = () => {
     };
   });
 
-  useEffect(() => {
-    const onWindowResize = () => {
-      if (canvasWrapperRef) {
-        const width = canvasWrapperRef.clientWidth;
-        const height = canvasWrapperRef.clientHeight;
-        const context = canvas?.getContext();
-
-        if (canvas && context) {
-          canvas.setWidth(width);
-          canvas.setHeight(height);
-        }
-      }
-    };
-    onWindowResize();
-
-    window.addEventListener("resize", onWindowResize);
-    return () => {
-      window.removeEventListener("resize", onWindowResize);
-    };
-  }, [canvas, canvasWrapperRef]);
-
   return (
-    <StyledCanvasWrapper ref={dropRef} {...collected}>
-      <div id="canvas-container" className="wrapper"></div>
-
-      {/* <div className="wrapper" ref={setCanvasWrapperRef}>
-        <canvas ref={setCanvasRef}></canvas>
-
-        {canvasWidgets.map((canvasWidget) => {
-          switch (canvasWidget.type) {
-            case "number-line":
-              return (
-                <NumberLine
-                  key={canvasWidget.id}
-                  id={canvasWidget.id}
-                  canvas={canvas}
-                  initialX={canvasWidget.x}
-                  initialY={canvasWidget.y}
-                  initialAngle={canvasWidget.angle}
-                  {...(canvasWidget.props as any)}
-                />
-              );
-            case "number-line-bar":
-              return (
-                <NumberLineBar
-                  key={canvasWidget.id}
-                  id={canvasWidget.id}
-                  canvas={canvas}
-                  initialX={canvasWidget.x}
-                  initialY={canvasWidget.y}
-                  initialAngle={canvasWidget.angle}
-                  {...(canvasWidget.props as any)}
-                />
-              );
-            default:
-              return null;
-          }
-        })}
-      </div> */}
+    <StyledCanvasWrapper>
+      <div
+        id="canvas-container"
+        className="wrapper"
+        ref={dropRef}
+        {...collected}
+      ></div>
     </StyledCanvasWrapper>
   );
 };

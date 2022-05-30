@@ -6,6 +6,14 @@ import ToolModal from "../common/ToolModal";
 import NumberSelect from "../input/NumberSelect";
 import NumberLine from "../widget/NumberLine";
 import NumberLineBar from "../widget/NumberLineBar";
+import { DragPreviewImage, useDrag } from "react-dnd";
+import { WidgetDraggableProps } from "../../types/widget";
+
+const defaultIntervalStart = 0;
+const defaultIntervalEnd = 1;
+const defaultBaseDominator = 4;
+const defaultNumerator = 1;
+const defaultDominator = 2;
 
 const StyledNumberLineToolContentDiv = styled.div`
   background-color: #c4c4c4;
@@ -57,6 +65,37 @@ const NumberLineToolModal: React.FC = () => {
   const [baseDominator, setBaseDominator] = useState<number | undefined>();
   const [numerator, setNumerator] = useState<number | undefined>();
   const [dominator, setDominator] = useState<number | undefined>();
+
+  const [imgNumberLineCollected, dragNumberLineImgRef, previewNumberLine] =
+    useDrag<WidgetDraggableProps>({
+      type: "widget",
+      item: {
+        widgetType: "number-line",
+        widgetProps: {
+          intervalStart: intervalStart ?? defaultIntervalStart,
+          intervalEnd: intervalEnd ?? defaultIntervalEnd,
+          baseDominator: baseDominator ?? defaultBaseDominator,
+        },
+      },
+    });
+
+  const [
+    imgNumberLineBarCollected,
+    dragNumberLineBarImgRef,
+    previewNumberLineBar,
+  ] = useDrag<WidgetDraggableProps>({
+    type: "widget",
+    item: {
+      widgetType: "number-line-bar",
+      widgetProps: {
+        intervalStart: intervalStart ?? defaultIntervalStart,
+        intervalEnd: intervalEnd ?? defaultIntervalEnd,
+        baseDominator: baseDominator ?? defaultBaseDominator,
+        numerator: numerator ?? defaultNumerator,
+        dominator: dominator ?? defaultDominator,
+      },
+    },
+  });
 
   const [numberLinePreviewImgSrc, setNumberLinePreviewImgSrc] = useState<
     string | null
@@ -159,10 +198,26 @@ const NumberLineToolModal: React.FC = () => {
 
       <StyledImageWrapper className="pt-2">
         {numberLinePreviewBarImgSrc && (
-          <img className="number-line-bar" src={numberLinePreviewBarImgSrc} alt="" />
+          <div ref={dragNumberLineBarImgRef} {...imgNumberLineBarCollected}>
+            <DragPreviewImage
+              connect={previewNumberLineBar}
+              src={numberLinePreviewBarImgSrc}
+            />
+            <img
+              className="number-line-bar"
+              src={numberLinePreviewBarImgSrc}
+              alt=""
+            />
+          </div>
         )}
         {numberLinePreviewImgSrc && (
-          <img className="number-line" src={numberLinePreviewImgSrc} alt="" />
+          <div ref={dragNumberLineImgRef} {...imgNumberLineCollected}>
+            <DragPreviewImage
+              connect={previewNumberLine}
+              src={numberLinePreviewImgSrc}
+            />
+            <img className="number-line" src={numberLinePreviewImgSrc} alt="" />
+          </div>
         )}
       </StyledImageWrapper>
     </ToolModal>

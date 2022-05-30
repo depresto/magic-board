@@ -1,5 +1,4 @@
 import Konva from "konva";
-import { KonvaEventObject } from "konva/lib/Node";
 
 export type WidgetElementProps = {
   id?: string;

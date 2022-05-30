@@ -1,8 +1,5 @@
-import React, { useEffect, useState } from "react";
 import Konva from "konva";
-import { useDrag, DragPreviewImage } from "react-dnd";
-import styled from "styled-components";
-import { WidgetDraggableProps, WidgetElementProps } from "../../types/widget";
+import { WidgetElementProps } from "../../types/widget";
 import { widgetActiveColor, widgetColor } from ".";
 import WidgetElement from "./WidgetElement";
 
@@ -18,11 +15,6 @@ const numberLineWidth = 400;
 const numberBarHeight = 20;
 const numberBarGapWidth = 4;
 const numberStartY = 0;
-
-const StyledPreviewDiv = styled.div`
-  cursor: pointer;
-  padding: 0 44px 0 48px;
-`;
 
 type NumberLineBarProps = WidgetElementProps & {
   intervalStart?: number;
