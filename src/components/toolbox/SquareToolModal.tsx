@@ -96,7 +96,7 @@ const SquareToolModal: React.FC = () => {
   }, [baseDominator, dominator, intervalEnd, intervalStart, numerator]);
 
   return (
-    <ToolModal title="方形工具" type="square-tool">
+    <ToolModal title="方形元件" type="square-tool">
       <StyledToolContentDiv>
         <div className="d-flex justify-content-between align-items-center">
           <div>

@@ -14,6 +14,7 @@ import {
   StyledModalPreviewImageWrapper,
   StyledToolContentDiv,
 } from "./index.styled";
+import CircleElement from "../widget/CircleElement";
 
 const defaultIntervalStart = 0;
 const defaultIntervalEnd = 1;
@@ -96,95 +97,62 @@ const CircleToolModal: React.FC = () => {
   }, [baseDominator, dominator, intervalEnd, intervalStart, numerator]);
 
   return (
-    <ToolModal title="圓形工具" type="square-tool">
-      <StyledToolContentDiv>
-        <div className="d-flex justify-content-between align-items-center">
-          <div>
-            <div className="d-flex align-items-center mb-2">
-              <span className="label mr-2">數值區間</span>
-              <NumberSelect
-                defaultValue={0}
-                value={intervalStart}
-                onChange={(intervalStart) => {
-                  setIntervalStart(intervalStart);
-                  if (!intervalEnd || intervalStart >= intervalEnd) {
-                    setIntervalEnd(intervalStart + 1);
-                  }
-                }}
-              />
-              <span className="mx-2">至</span>
-              <NumberSelect
-                defaultValue={1}
-                startIndex={1}
-                value={intervalEnd}
-                onChange={(intervalEnd) => {
-                  setIntervalEnd(intervalEnd);
-                  if (intervalStart && intervalStart >= intervalEnd) {
-                    setIntervalStart(intervalEnd - 1);
-                  }
-                }}
-              />
-            </div>
-            <div className="d-flex align-items-center mb-2">
-              <span className="label mr-4">切割數</span>
-              <NumberSelect
-                defaultValue={4}
-                startIndex={1}
-                value={baseDominator}
-                onChange={setBaseDominator}
-              />
-            </div>
-            <div className="d-flex align-items-center">
-              <span className="label mr-4">分數</span>
-              <div className="d-flex flex-column align-items-center">
-                <NumberSelect
-                  defaultValue={1}
-                  value={numerator}
-                  onChange={setNumerator}
-                />
-                <StyledDividerLineDiv />
-                <NumberSelect
-                  defaultValue={2}
-                  value={dominator}
-                  onChange={setDominator}
-                />
-              </div>
-            </div>
-          </div>
-
-          <StyledButton onClick={onReset}>
-            <FontAwesomeIcon icon={faRotateLeft} />
-            <span className="ml-2">復原</span>
-          </StyledButton>
-        </div>
-      </StyledToolContentDiv>
-
+    <ToolModal title="圓形元件" type="circle-tool">
       <StyledModalPreviewImageWrapper className="pt-2">
-        {numberLinePreviewBarImgSrc && (
-          <div ref={dragNumberLineBarImgRef} {...imgNumberLineBarCollected}>
-            <DragPreviewImage
-              connect={previewNumberLineBar}
-              src={numberLinePreviewBarImgSrc}
-            />
-            <img
-              className="number-line-bar"
-              src={numberLinePreviewBarImgSrc}
-              alt=""
-            />
-          </div>
-        )}
-        {numberLinePreviewImgSrc && (
-          <div ref={dragNumberLineImgRef} {...imgNumberLineCollected}>
-            <DragPreviewImage
-              connect={previewNumberLine}
-              src={numberLinePreviewImgSrc}
-            />
-            <img className="number-line" src={numberLinePreviewImgSrc} alt="" />
-          </div>
-        )}
+        <div className="d-flex flex-wrap">
+          {[...Array(10)].map((_, index) => {
+            return (
+              <PreviewableCircleElement
+                key={index}
+                dominator={index + 1}
+                numerator={1}
+              />
+            );
+          })}
+        </div>
       </StyledModalPreviewImageWrapper>
     </ToolModal>
   );
+};
+
+const StyledPreviewableCircleWrapper = styled.div`
+  width: 100px;
+`;
+
+const PreviewableCircleElement: React.FC<{
+  numerator: number;
+  dominator: number;
+}> = ({ numerator, dominator }) => {
+  const [previewImageSrc, setPreviewImageSrc] = useState<string | null>(null);
+  const [imgCollected, dragImgRef, preview] = useDrag<WidgetDraggableProps>({
+    type: "widget",
+    item: {
+      widgetType: "circle-element",
+      widgetProps: {
+        numerator,
+        dominator,
+      },
+    },
+  });
+
+  useEffect(() => {
+    const circleElement = new CircleElement({
+      numerator,
+      dominator,
+    });
+    setPreviewImageSrc(circleElement.toImageUrl());
+  }, [dominator, numerator]);
+
+  if (previewImageSrc) {
+    return (
+      <StyledPreviewableCircleWrapper ref={dragImgRef} {...imgCollected}>
+        <DragPreviewImage connect={preview} src={previewImageSrc} />
+        <img className="preview-image" src={previewImageSrc} alt="" />
+      </StyledPreviewableCircleWrapper>
+    );
+  } else {
+    return null;
+  }
 };
 
 export default CircleToolModal;

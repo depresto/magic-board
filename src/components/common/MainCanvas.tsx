@@ -10,6 +10,7 @@ import { useToolbox } from "../../context/ToolboxContext";
 import NumberLineBar from "../widget/NumberLineBar";
 import { notEmpty } from "../../helpers";
 import WidgetElement from "../widget/WidgetElement";
+import CircleElement from "../widget/CircleElement";
 
 const magnetAngle = 5;
 const magnetUnitAngle = 45;
@@ -76,23 +77,28 @@ const MainCanvas: React.FC = () => {
   useEffect(() => {
     if (stage) {
       for (const canvasWidget of canvasWidgets) {
-        let widget: WidgetElement | null = null;
-        const positionProps = {
-          initialX: canvasWidget.x,
-          initialY: canvasWidget.y,
-          initialAngle: canvasWidget.angle,
-        };
+        let Widget: typeof WidgetElement | null = null;
 
         switch (canvasWidget.type) {
           case "number-line":
-            widget = new NumberLine({ ...canvasWidget, ...positionProps });
+            Widget = NumberLine;
             break;
           case "number-line-bar":
-            widget = new NumberLineBar({ ...canvasWidget, ...positionProps });
+            Widget = NumberLineBar;
+            break;
+          case "circle-element":
+            Widget = CircleElement;
             break;
         }
 
-        if (widget) {
+        if (Widget) {
+          const widget = new Widget({
+            ...canvasWidget,
+            initialX: canvasWidget.x,
+            initialY: canvasWidget.y,
+            initialAngle: canvasWidget.angle,
+            ...canvasWidget.props,
+          });
           stage.add(widget.widgetLayer);
         }
       }
