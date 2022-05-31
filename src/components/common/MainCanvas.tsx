@@ -11,6 +11,7 @@ import NumberLineBar from "../widget/NumberLineBar";
 import { notEmpty } from "../../helpers";
 import WidgetElement from "../widget/WidgetElement";
 import CircleElement from "../widget/CircleElement";
+import SquareElement from "../widget/SquareElement";
 
 const magnetAngle = 5;
 const magnetUnitAngle = 45;
@@ -88,6 +89,9 @@ const MainCanvas: React.FC = () => {
             break;
           case "circle-element":
             Widget = CircleElement;
+            break;
+          case "square-element":
+            Widget = SquareElement;
             break;
         }
 

@@ -5,7 +5,7 @@ export type WidgetElementProps = {
   initialY?: number;
   initialAngle?: number;
 };
-export type WidgetType = "number-line" | "number-line-bar" | 'circle-element';
+export type WidgetType = "number-line" | "number-line-bar" | 'circle-element' | 'square-element';
 export type WidgetProps = { [key: string]: number | undefined };
 export type WidgetDraggableProps = {
   widgetType: WidgetType;
